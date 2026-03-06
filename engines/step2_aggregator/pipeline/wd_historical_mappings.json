@@ -1,0 +1,758 @@
+[
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "122064657838 VODAFONE GMBH",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "HSBC - USD Savings (Bullish HK)",
+    "Notes": "1/BULLISH GLOBAL/OCMT/USD196393,00/CHGS/USD10,00//ROC/00000000341599/OGB/CUSTOMERS BANK,",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "HSBC - USD Current 8178 (Bullish SG)",
+    "Notes": "1/BULLISH GLOBAL/ROC/00000000341598",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "26403856 CENTRICCOM AG",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "66026436 66208336 BUNDESANZEIGER VERLAG GMBH",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "HSBC - USD Savings (Bullish HK)",
+    "Notes": "741448666838     7.810299000 /OCMT/HKD59280,17/EXCH/7,810299/TMS/2026-02-20T18:44:20 GMT",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "HSBC - USD Savings (Bullish HK)",
+    "Notes": "741448666838     7.820560000 /OCMT/HKD117308,40/EXCH/7,820560/TMS/2026-02-27T00:50:21 GMT",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "ACCRUE SOLUTIONS/ACH PmtJan 2026 COBRA Remittance",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Gibraltar EUR 8189 - Bullish GI",
+    "Notes": "A/C MAINT FEE 01.02.2026 TO 28.02.2026",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Gibraltar EUR 8776 - Bullish GI",
+    "Notes": "A/C MAINT FEE 01.02.2026 TO 28.02.2026",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Gibraltar GBP 8184 - Bullish GI",
+    "Notes": "A/C MAINT FEE 01.02.2026 TO 28.02.2026",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Gibraltar GBP 8770 - Bullish GI",
+    "Notes": "A/C MAINT FEE 01.02.2026 TO 28.02.2026",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Gibraltar USD 8190 - Bullish GI",
+    "Notes": "A/C MAINT FEE 01.02.2026 TO 28.02.2026",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Gibraltar USD 8777 - Bullish GI",
+    "Notes": "A/C MAINT FEE 01.02.2026 TO 28.02.2026",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "Acressa/HSA FundBullish US LLC",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Staff & Bonus"
+  },
+  {
+    "Account Name": "Silicon Valley 1780 - CoinDesk, Inc.",
+    "Notes": "ANALYSIS SERVICE CHARGE",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Silicon Valley USD 0270 - CoinDesk Indices, Inc",
+    "Notes": "ANALYSIS SERVICE CHARGE",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Silicon Valley USD 9644 - CoinDesk, Inc.",
+    "Notes": "ANALYSIS SERVICE CHARGE",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "ARLINGTON COUNTY/ARLCO PMTBRYAN SHAYDA",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "BEU EXPENSES REIMBURSEMENTS ABBY HO SHAN YEUNG",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "BEU EXPENSES REIMBURSEMENTS JULIA LIPPOTH",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "BEU EXPENSES REIMBURSEMENTS MARCO BODEWEIN",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "BEU TRANSFER - BANKING CIRCLE BULLISH EUROPE GMBH",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "HSBC - HKD Current Account (Bullish HK)",
+    "Notes": "BULLISH HK LIMITED",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "BULLISH US LLC/PAYMENTBULLISH US",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Silicon Valley USD 9644 - CoinDesk, Inc.",
+    "Notes": "FX 245493462000001 CNH 150000 RATE: 6.90515CASE 1981763 BUYBACKRETURN OF FX2026020600112R",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Silicon Valley USD 9644 - CoinDesk, Inc.",
+    "Notes": "FX 245667897000001 HKD 139800 RATE: 7.7020597",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "GLOBALIZATION EDI PAYMNT REF*TN*100WACD205\\100WACD205785/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Staff & Bonus"
+  },
+  {
+    "Account Name": "Silicon Valley 1780 - CoinDesk, Inc.",
+    "Notes": "GOOGLE YOUTUBE_PA US004AIK6M DCG Media, LLC",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Advertising Revenue"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "INCOMING WIRE 20260224B1Q8151C467977 #253995 BULLISH SOP/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "INCOMING WIRE 20260225B1Q8154C500248 #257688 BULLISH SOP/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 1476 - CoinDesk Indices",
+    "Notes": "INCOMING WIRE 20260225B1Q8984C003463 #259073 GLOBAL X MANAGEMENT COMPANY LLC/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Data Revenue"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "INCOMING WIRE 20260226B1Q8151C527698 #261310 BULLISH SOP/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "INCOMING WIRE 20260226B1Q8181C000161 #259947 CARAT FRANCE/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Events & Sponsorship Revenue"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "INCOMING WIRE 20260226MMQFMP2N009967 #260560 MONFI DIGITAL BANK LTD/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Events & Sponsorship Revenue"
+  },
+  {
+    "Account Name": "Customers Bank USD 1476 - CoinDesk Indices",
+    "Notes": "INCOMING WIRE 20260227B1Q8021C005926 #263907 ARDA SOLUTIONS MENA L.L.CFZ/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Data Revenue"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "INCOMING WIRE 20260227B1Q8152C563803 #265814 BULLISH SOP/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 0572 - BTH",
+    "Notes": "INCOMING WIRE 20260227MMQFMP4S001172 #265398 JITO FOUNDATION/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Rewards and Other Interest"
+  },
+  {
+    "Account Name": "Banking Circle 8412 - BDEU",
+    "Notes": "INTERNAL TRANSFER BULLISH EUROPE GMBH",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "INTERNAL TRANSFER BULLISH EUROPE GMBH",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "NJ WEB PMT 02001/NJWEB02001TXP*B972848138500*02201*221231*T*83723**",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Tax Payments"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "NJ WEB PMT 02001/NJWEB02001TXP*B972848138500*02201*231231*T*79720**",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Tax Payments"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "NJ WEB PMT 02001/NJWEB02001TXP*B972848138500*02201*241231*T*64022**",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Tax Payments"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "OUTGOING WIRE #252095 CSYNDICATE LTD/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "OUTGOING WIRE #257532 CSYNDICATE LTD/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "OUTGOING WIRE #260345 NICOLE LITTAUER/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "OUTGOING WIRE #260348 LJ FUTURES CONSULTING LLC,/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "OUTGOING WIRE #260349 NEW TEAM LLC/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "OUTGOING WIRE #260355 NIKKEI AMERICA, INC./",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "OUTGOING WIRE #260357 BOMBORA, INC./",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Cloud, IT & Software"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "OUTGOING WIRE #261841 BANKING CIRCLE/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "OUTGOING WIRE #261947 BULLISH SG PTE LTD/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "OUTGOING WIRE #261948 BULLISH HK LIMITED/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "OUTGOING WIRE #261949 BULLISH SERVICES KY LTD/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "OUTGOING WIRE #268238 BANKING CIRCLE/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "Paxos Global Pte Paxos HTAK Paxos HTAK4C CI-02023Paxos HTAK4C CI/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Rewards and Other Interest"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "Publisher First PAYMENTS 260227 10126012789497110126012/7894971/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Advertising Revenue"
+  },
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "RE-344-2026 KUCERA RECHTSANWALTE MBB",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Silicon Valley USD 9644 - CoinDesk, Inc.",
+    "Notes": "SENDER ID:=SVBKUS6S; SENDER REF:=2026057000344500; ORG:=COINDESK, INC.; ORG ID:=3302149644; ORG ADDRESS:=250 PARK AVENUE SOUTH2ND FLOORUS/NEW YORK, NY  10003; ORG FI ID:=SVBKUS6S; ORG FI:=First Citizens Bank and Trust Co.; ORG FI ADDRESS:=239 Fayetteville St US/Raleigh,NC,27601; BNF ID:=100251567982; BNF NAME:=TechTwist Corporation; BNF ADDRESS:=Unit 405, GEMPC Bldg, 132 Timog Ave , Diliman PH/Quezon City,,,; BNF FI:=BDO Unibank Inc; BNF FI ID:=BNORPHMM; REC ID:=CITIUS33;",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Cloud, IT & Software"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "STRIPE TRANSFER 260224 ST-F9T9H9F7S2O5ST-F9T9H/9F7S2O5/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Advertising Revenue"
+  },
+  {
+    "Account Name": "Silicon Valley USD 9644 - CoinDesk, Inc.",
+    "Notes": "SWEEP FROM DDA 3301431780",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Gibraltar USD 8777 - Bullish GI",
+    "Notes": "TERM DEP 1 WK A/C NO. 80029635@3.15% P.A MATURITY 03.03.2026",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Gibraltar USD 8190 - Bullish GI",
+    "Notes": "TERM DEP 1 WK A/C NO. 80029637@3.15% P.A MATURITY 03.03.2026",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Gibraltar USD 8777 - Bullish GI",
+    "Notes": "TERM DEP MAT 1 WK A/C NO. 80029392",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Gibraltar USD 8190 - Bullish GI",
+    "Notes": "TERM DEP MAT 1 WK A/C NO. 80029397",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Silicon Valley 1780 - CoinDesk, Inc.",
+    "Notes": "TRANSFER FROM DDA 3302149644",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Silicon Valley USD 9644 - CoinDesk, Inc.",
+    "Notes": "TRANSFER TO DDA 3301431780",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "OUTGOING WIRE #260354 CLEVERTECH PARTNERS LLC/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Cloud, IT & Software"
+  },
+  {
+    "Account Name": "HSBC - SGD Current 7001 (Bullish SG)",
+    "Notes": "/BTOT/7/SUPP//PYTP/CREDIT TRF",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Customers Bank 3749 - BTH",
+    "Notes": "REF 0571129L FUNDS TRANSFER TO DEP XXX7404 FROM ONLINE/ FUNDS TRANSFER VIA/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank 3749 - BTH",
+    "Notes": "REF 0581516L FUNDS TRANSFER TO DEP XXX7404 FROM ONLINE/ FUNDS TRANSFER VIA/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Atlantic Union MMA (LOC Collateral) - Bullish US",
+    "Notes": "Funds Transfer via Online To:  0048",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank 3749 - BTH",
+    "Notes": "REF 0541305L FUNDS TRANSFER TO DEP XXX7404 FROM ONLINE/ FUNDS TRANSFER VIA/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank 3749 - BTH",
+    "Notes": "REF 0581429L FUNDS TRANSFER TO DEP XXX7404 FROM ONLINE/ FUNDS TRANSFER VIA/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "REF 0571130L FUNDS TRANSFER TO DEP XXX0572 FROM ONLINE/ FUNDS TRANSFER VIA/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank 3749 - BTH",
+    "Notes": "REF 0571116L FUNDS TRANSFER TO DEP XXX7404 FROM ONLINE/ FUNDS TRANSFER VIA/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "HSBC - HKD Savings (Bullish HK)",
+    "Notes": "/ORDP/AIA INTL LTD/BREF/519973410104773                    /OBK/006/PURP/CNONEM/EREF/82de58548b9143d7b56c8b3d74c9a8c6   /REMI/A7        HPRDR",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "01D0520866 20162223 PRICEWATERHOUSECOOPERS GMBH",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "HSBC - SGD Current 7001 (Bullish SG)",
+    "Notes": "/CREF/PAYROLL/BREF/90012L83XPZ4/REMI/PAYROLL/OCMT/SGD464845,51/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Staff & Bonus"
+  },
+  {
+    "Account Name": "HSBC - USD Savings (Bullish HK)",
+    "Notes": "BAIRSTO CONSULTING SERVICES LTDJ057000049810001/BBK/STARLING BANK LIMITED32518 INV-0056 /OCMT/GBP5000,00/EXCH/0,734515/TMS/2026-02-26T02:01:45 GMT",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "HSBC - USD Savings (Bullish HK)",
+    "Notes": "BAIRSTO CONSULTING SERVICES LTDJ057000049810001",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "NAVAN EXPST-0002 NAVAN EXPS 260225 ST-W8K3A8E3S9X4ST-W8K3A/8E3S9X4/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Cloud, IT & Software"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "OUTGOING WIRE #267797 NAVAN, INC/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Cloud, IT & Software"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "Innovative Disc/PaymentBullish US LLC",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Rewards and Other Interest"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "REF 0541305L FUNDS TRANSFER FRMDEP XXX3749 FROM ONLINE/ FUNDS TRANSFER VIA/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "REF 0581429L FUNDS TRANSFER FRMDEP XXX3749 FROM ONLINE/ FUNDS TRANSFER VIA/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "REF 0571129L FUNDS TRANSFER FRMDEP XXX3749 FROM ONLINE/ FUNDS TRANSFER VIA/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "REF 0571116L FUNDS TRANSFER FRMDEP XXX3749 FROM ONLINE/ FUNDS TRANSFER VIA/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "REF 0581516L FUNDS TRANSFER FRMDEP XXX3749 FROM ONLINE/ FUNDS TRANSFER VIA/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Atlantic Union MMA 048 - Bullish US",
+    "Notes": "Funds Transfer via Online From:  6342",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 0572 - BTH",
+    "Notes": "REF 0571130L FUNDS TRANSFER FRMDEP XXX7404 FROM ONLINE/ FUNDS TRANSFER VIA/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Inflow"
+  },
+  {
+    "Account Name": "Atlantic Union MMA (LOC Collateral) - Bullish US",
+    "Notes": "INTEREST EARNED",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Rewards and Other Interest"
+  },
+  {
+    "Account Name": "Atlantic Union MMA 048 - Bullish US",
+    "Notes": "INTEREST EARNED",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Rewards and Other Interest"
+  },
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "SB B049-1779 TOG THE OFFICE GROUP (GERMANY) GMBH",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Facilities Rent"
+  },
+  {
+    "Account Name": "HSBC - USD Savings (Bullish HK)",
+    "Notes": "BLOOMBERG FINANCE LPJ057000049800001",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Cloud, IT & Software"
+  },
+  {
+    "Account Name": "HSBC - USD Savings (Bullish HK)",
+    "Notes": "BLOOMBERG FINANCE LPJ057000049800001/BBK/BANK OF AMERICA, N.A.32517 5609416117",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Cloud, IT & Software"
+  },
+  {
+    "Account Name": "Silicon Valley 1780 - CoinDesk, Inc.",
+    "Notes": "SWEEP TO DDA 3302149644",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Intercompany Outflow"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "ANALYSIS ACTIVITY FOR 01/26/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "ANALYSIS ACTIVITY",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "WIRE/OUT BNF:ADP CLIENT TRUST",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Staff & Bonus"
+  },
+  {
+    "Account Name": "HSBC - HKD Current Account (Bullish HK)",
+    "Notes": "01 ADP HUMAN RESOURCES S",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Staff & Bonus"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "OUTGOING WIRE #260305 EVERSHEDS SUTHERLAND GERMANY RECHTS/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Legal Fees"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "AMERIFLEX LLC/PPDFUNDINGBullish US LLC",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Staff & Bonus"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "EMPOWER/EMPOWERBullish",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Customers Bank 3749 - BTH",
+    "Notes": "METATECH HOLD 9100/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Nonco Inflow"
+  },
+  {
+    "Account Name": "Customers Bank 3749 - BTH",
+    "Notes": "CIRCLE INTERN 7479/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Nonco Inflow"
+  },
+  {
+    "Account Name": "Customers Bank 3749 - BTH",
+    "Notes": "OUTGOING WIRE #263028 COINBASE IRELAND LIMITED/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Nonco Outflow"
+  },
+  {
+    "Account Name": "Customers Bank 3749 - BTH",
+    "Notes": "OUTGOING WIRE #255683 COINBASE IRELAND LIMITED/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Nonco Outflow"
+  },
+  {
+    "Account Name": "Customers Bank 3749 - BTH",
+    "Notes": "COINBASE, INC 2958/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Nonco Outflow"
+  },
+  {
+    "Account Name": "Customers Bank 3749 - BTH",
+    "Notes": "OUTGOING WIRE #256087 COINBASE IRELAND LIMITED/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Nonco Outflow"
+  },
+  {
+    "Account Name": "Atlantic Union USD Checking 342 - Bullish US",
+    "Notes": "Brex Inc./PAYMENTSNTE*ZZZ*Brex Card Payment\\",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "DE08707047 ADP EMPLOYER SERVICES GMBH",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "Deel, Inc. Deel Inc. 260226 ST-D8N3Z6O0L0B4ST-D8N3Z/6O0L0B4/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Staff & Bonus"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "INCOMING WIRE 20260224B1Q8153C463807 #253421 BERMUDA BUSINESS DEVELOPMENT AG/E/NCY/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Events & Sponsorship Revenue"
+  },
+  {
+    "Account Name": "Customers Bank USD 1476 - CoinDesk Indices",
+    "Notes": "INCOMING WIRE 20260224B6B7HU2R006670 #253922 CHICAGO MERCANTILE EXCHANGE INC/./",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Data Revenue"
+  },
+  {
+    "Account Name": "Customers Bank USD 1476 - CoinDesk Indices",
+    "Notes": "INCOMING WIRE 20260226MMQFMP84000754 #263033 MOON INC DBA LIBERTY X/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Data Revenue"
+  },
+  {
+    "Account Name": "Customers Bank USD 1476 - CoinDesk Indices",
+    "Notes": "INCOMING WIRE 20260227G1QG750C026537 #268476 PURPOSE INVESTMENTS INC. - USD/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Data Revenue"
+  },
+  {
+    "Account Name": "Customers Bank USD 1476 - CoinDesk Indices",
+    "Notes": "INCOMING WIRE 20260227MFP00030000202 #263960 FLOWDESK SAS/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Data Revenue"
+  },
+  {
+    "Account Name": "Banking Circle EUR 8416 - BDEU",
+    "Notes": "INV.FRPAY.3204 BCB PAYMENTS (EUROPE) SASU",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Customers Bank USD 6991 (Oper. Account) - Bullish GI",
+    "Notes": "OUTGOING WIRE #257373 PERSONA IDENTITIES, INC./",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Cloud, IT & Software"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "OUTGOING WIRE #260346 RSM US LLP/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Consulting, Contracting, Prof Fees"
+  },
+  {
+    "Account Name": "Customers Bank USD 7404 - Bullish Global",
+    "Notes": "OUTGOING WIRE #260351 CISION US INC./",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "OUTGOING WIRE #260353 BRAVE SOFTWARE INTERNATIONAL/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "All Other"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "OUTGOING WIRE #260356 ADSWERVE INC/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Cloud, IT & Software"
+  },
+  {
+    "Account Name": "Customers Bank USD 2748 - CoinDesk, Inc.",
+    "Notes": "Rise Works Inc MercuryACH CST-00378. CI-01909MRCR-VRV67XPBE5/",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Events & Sponsorship Revenue"
+  },
+  {
+    "Account Name": "Silicon Valley 1780 - CoinDesk, Inc.",
+    "Notes": "SENDER BNK:=BK OF NYC; SENDER ID:=021000018; SENDER REF:=2026054000863700; ORG:=Metabase 58 Cayman Limited; ORG ADDRESS:=87 MARY ST,GRAND CAYMAN,CAYMAN ISLA NDS KY1 1107; ORG FI ID:=BNTBKYKY; ORG FI:=BUTTERFIELD BANK (CAYMAN) LIMITED; ORG FI ADDRESS:=12 BUTTERFIELD PLACE ALBERT PNTN ST GEORGE TOWN KY11107 CAYMAN ISLANDS; BNF ID:=3301431780; BNF NAME:=COINDESK, INC.; BNF ADDRESS:=250 PARK AVENUE SOUTH2ND FLOORUS/NEW YORK, NY  10003; BNF FI:=SILICON VALLEY BANK; BNF FI ID:=SVBKUS6S; REC FI:=SVB A DIV OF FCB; REC ID:=121140399; BBI:=Metabase INV 543 Consensus; OBI:=Metabase INV 543 Consensus;",
+    "Source": "Workday",
+    "13WCF Line Item Mapping": "Events & Sponsorship Revenue"
+  }
+]

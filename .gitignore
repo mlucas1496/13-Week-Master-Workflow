@@ -4,3 +4,5 @@ uploads/
 outputs/
 *.pyc
 .DS_Store
+*.egg-info/
+.env

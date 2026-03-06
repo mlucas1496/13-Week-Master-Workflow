@@ -2,11 +2,14 @@
 13WCF Unified Workflow
 ======================
 Combines all 5 weekly processing steps into a single Flask application:
-  Step 1: Weekly Balances Rollforward
+  Step 1: Weekly Balances Rollforward (in-browser)
   Step 2: Activity Aggregator Update
   Step 3: Activity Aggregator Mapper
   Step 4: Activity Rollforward
-  Step 5: 13WCF Data Loader
+  Step 5: 13WCF Data Loader (in-browser)
+
+All engine code is bundled in the engines/ directory — no external
+folders or files are needed.
 """
 
 import os
@@ -24,22 +27,24 @@ from flask import Flask, render_template, request, jsonify, Response, send_file
 from werkzeug.utils import secure_filename
 
 # ---------------------------------------------------------------------------
-# Path setup: add existing app directories so we can import their modules
+# Path setup: all engines are bundled locally
 # ---------------------------------------------------------------------------
-ACTIVITY_AGG_UPDATE_DIR = os.path.expanduser(
-    "~/Documents/Activity Aggregator Update/app"
-)
-ACTIVITY_AGG_MAPPER_DIR = os.path.expanduser(
-    "~/Documents/Activity Aggregator Manual Mapping/app"
-)
-ACTIVITY_ROLLFORWARD_DIR = os.path.expanduser(
-    "~/Desktop/13WCF-Activity-Rollforward"
-)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Add to sys.path for imports
-for p in [ACTIVITY_AGG_UPDATE_DIR, ACTIVITY_ROLLFORWARD_DIR]:
-    if p not in sys.path:
-        sys.path.insert(0, p)
+STEP2_ENGINE_DIR = os.path.join(BASE_DIR, "engines", "step2_aggregator")
+STEP3_ENGINE_DIR = os.path.join(BASE_DIR, "engines", "step3_mapper")
+STEP4_ENGINE_DIR = os.path.join(BASE_DIR, "engines", "step4_rollforward")
+STEP5_ENGINE_DIR = os.path.join(BASE_DIR, "engines", "step5_data_loader")
+
+# Step 2 uses `from pipeline.xxx import ...` and `from config import ...`
+# so we add its directory to sys.path
+if STEP2_ENGINE_DIR not in sys.path:
+    sys.path.insert(0, STEP2_ENGINE_DIR)
+
+# Step 4 uses `import stacked_activity_updater` and `import fva_data_updater`
+# as sibling imports, so we add its directory too
+if STEP4_ENGINE_DIR not in sys.path:
+    sys.path.insert(0, STEP4_ENGINE_DIR)
 
 # ---------------------------------------------------------------------------
 # Import Step 2 pipeline (Activity Aggregator Update)
@@ -47,15 +52,14 @@ for p in [ACTIVITY_AGG_UPDATE_DIR, ACTIVITY_ROLLFORWARD_DIR]:
 from pipeline.orchestrator import run_pipeline as step2_run_pipeline
 
 # ---------------------------------------------------------------------------
-# Import Step 3 mapper functions (Activity Aggregator Mapper)
-# We use importlib because the file is named app.py and would conflict
+# Import Step 3 mapper (Activity Aggregator Mapper)
+# Uses importlib to avoid Flask app conflicts
 # ---------------------------------------------------------------------------
 _mapper_spec = importlib.util.spec_from_file_location(
     "mapper_engine",
-    os.path.join(ACTIVITY_AGG_MAPPER_DIR, "app.py"),
+    os.path.join(STEP3_ENGINE_DIR, "mapper.py"),
 )
 mapper_engine = importlib.util.module_from_spec(_mapper_spec)
-# Prevent Flask from actually binding
 _orig_argv = sys.argv
 sys.argv = [""]
 _mapper_spec.loader.exec_module(mapper_engine)
@@ -67,13 +71,9 @@ sys.argv = _orig_argv
 import stacked_activity_updater
 import fva_data_updater
 
-# Import the main rollforward app module (has process_files function)
 _rollforward_spec = importlib.util.spec_from_file_location(
     "rollforward_engine",
-    os.path.join(
-        ACTIVITY_ROLLFORWARD_DIR,
-        "13WCF-Activity Rollforward App v2.6.1.py",
-    ),
+    os.path.join(STEP4_ENGINE_DIR, "rollforward.py"),
 )
 rollforward_engine = importlib.util.module_from_spec(_rollforward_spec)
 sys.argv = [""]
@@ -83,8 +83,6 @@ sys.argv = _orig_argv
 # ---------------------------------------------------------------------------
 # Flask app
 # ---------------------------------------------------------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024  # 1 GB
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
@@ -92,7 +90,7 @@ OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Configure the imported rollforward engine's app to use our output folder
+# Configure the imported rollforward engine's app to use our folders
 rollforward_engine.app.config["OUTPUT_FOLDER"] = OUTPUT_DIR
 rollforward_engine.app.config["UPLOAD_FOLDER"] = UPLOAD_DIR
 
@@ -320,14 +318,10 @@ def run_step3():
 
     def worker():
         try:
-            # Use the mapper engine's run_mapping function
-            # It writes to mapper_engine.OUTPUT_DIR
-            # We'll copy the output to our output dir afterwards
             mapper_engine.run_mapping(agg_path, roll_path)
 
             # Wait for completion
             while mapper_engine.job_state["status"] == "running":
-                # Forward logs
                 current_logs = mapper_engine.job_state.get("logs", [])
                 for entry in current_logs[len(workflow["step_logs"]["3"]):]:
                     text = entry["text"] if isinstance(entry, dict) else str(entry)
@@ -341,7 +335,6 @@ def run_step3():
                 workflow["step_logs"]["3"].append(text)
 
             if mapper_engine.job_state["status"] == "done":
-                # Copy output file to our output dir
                 src_name = mapper_engine.job_state.get("filename", "Activity Aggregator - MAPPED.xlsx")
                 src_path = str(mapper_engine.OUTPUT_DIR / src_name)
 
@@ -413,13 +406,9 @@ def run_step4():
     if workflow["step_status"]["4"] == "running":
         return jsonify({"error": "Already running"}), 409
 
-    # Weekly Balances: from Step 1 output or manual upload
     weekly_path = get_file_path("step1_weekly_balances_output") or get_file_path("s4_weekly_balances")
-    # Rollforward: same file used in Step 3 or manual upload
     rollforward_path = get_file_path("s3_rollforward") or get_file_path("s4_rollforward")
-    # Mapped Aggregator: from Step 3 output or manual upload
     aggregator_path = get_file_path("step3_mapped_aggregator_output") or get_file_path("s4_aggregator")
-    # Optional files
     bth_path = get_file_path("s4_bth")
     fva_1w = get_file_path("s4_fva_1week")
     fva_4w = get_file_path("s4_fva_4week")
@@ -548,13 +537,13 @@ def boc_fx_proxy():
 
 
 # ---------------------------------------------------------------------------
-# Serve the Data Loader HTML for Step 5 (in-page)
+# Serve the Data Loader HTML for Step 5 (bundled locally)
 # ---------------------------------------------------------------------------
 
 @app.route("/api/data-loader-html")
 def data_loader_html():
     """Serve the 13WCF Data Loader HTML."""
-    loader_path = os.path.expanduser("~/Desktop/13WCF Data Loader.html")
+    loader_path = os.path.join(STEP5_ENGINE_DIR, "data_loader.html")
     if os.path.exists(loader_path):
         with open(loader_path, "r") as f:
             return f.read()
