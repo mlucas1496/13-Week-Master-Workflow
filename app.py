@@ -526,6 +526,28 @@ def download_output(step):
 
 
 # ---------------------------------------------------------------------------
+# Step 1: Bank of Canada FX rate proxy (replaces Vite dev proxy)
+# ---------------------------------------------------------------------------
+
+@app.route("/api/boc-fx")
+def boc_fx_proxy():
+    """Proxy Bank of Canada Valet API requests to avoid CORS issues."""
+    import requests as req
+    start_date = request.args.get("start_date", "")
+    end_date = request.args.get("end_date", "")
+    url = (
+        f"https://www.bankofcanada.ca/valet/observations/group/FX_RATES_DAILY/json"
+        f"?start_date={start_date}&end_date={end_date}"
+    )
+    try:
+        resp = req.get(url, timeout=15)
+        return Response(resp.content, status=resp.status_code,
+                        content_type=resp.headers.get("Content-Type", "application/json"))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 502
+
+
+# ---------------------------------------------------------------------------
 # Serve the Data Loader HTML for Step 5 (in-page)
 # ---------------------------------------------------------------------------
 

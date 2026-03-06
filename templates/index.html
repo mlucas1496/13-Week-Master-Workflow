@@ -6,6 +6,7 @@
 <title>13WCF Unified Workflow</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
@@ -276,34 +277,25 @@ body {
   font-family: 'DM Sans', monospace;
 }
 
-/* ── Step 1 special: link to React app ── */
-.step1-launch {
-  text-align: center;
-  padding: 40px;
-  border: 2px dashed var(--border);
-  border-radius: 14px;
+/* ── Step 1 API key field ── */
+.api-key-section {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 10px;
   background: var(--bg-card);
-  margin-bottom: 24px;
+  border: 1px solid var(--border);
 }
-.step1-launch .icon { font-size: 48px; margin-bottom: 16px; }
-.step1-launch h3 { font-size: 18px; margin-bottom: 8px; }
-.step1-launch p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
-.step1-launch a {
-  display: inline-block;
-  padding: 12px 32px;
-  font-family: inherit; font-size: 14px; font-weight: 600;
-  color: #000; background: var(--green);
-  border-radius: 10px; text-decoration: none;
-  transition: all 0.15s;
+.api-key-section .label-row {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
 }
-.step1-launch a:hover { background: #20f098; transform: translateY(-1px); }
-
-.or-divider {
-  text-align: center;
-  margin: 20px 0;
-  font-size: 12px;
-  color: var(--text-dim);
+.api-key-section label { font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+.api-key-section .toggle-btn { background: none; border: none; color: var(--text-dim); font-size: 10px; cursor: pointer; }
+.api-key-section input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 10px; color: var(--text);
+  font-size: 12px; font-family: monospace; outline: none;
 }
+.api-key-section .hint { font-size: 10px; color: var(--text-dim); margin-top: 4px; }
 
 /* ── Step 5 iframe ── */
 .step5-frame {
@@ -403,30 +395,78 @@ body {
   <div class="step-panel active" id="panel-1">
     <div class="panel-header">
       <h2>Step 1: Weekly Balances Rollforward</h2>
-      <p>Process the weekly balances file using the dedicated rollforward tool. After processing, upload the output here so it's available for Step 4.</p>
+      <p>Upload 7 input files to roll forward balances, update bank statements, snapshot balances, CCC balances, EoD balances, and FX rates. Processing runs entirely in your browser.</p>
     </div>
 
-    <div class="step1-launch">
-      <div class="icon">&#x1F4CA;</div>
-      <h3>Open Weekly Balances Tool</h3>
-      <p>This opens the dedicated Weekly Balances Rollforward app in a new tab.<br>Process your 7 input files there, then come back and upload the output below.</p>
-      <a href="http://localhost:5174" target="_blank">Launch Weekly Balances App &rarr;</a>
-    </div>
-
-    <div class="or-divider">&mdash; After processing, upload the output file below &mdash;</div>
-
-    <div class="section-label">Output File</div>
-    <div class="upload-grid cols-1">
-      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="step1_weekly_balances_output">
-        <div class="card-label">Updated Weekly Balances</div>
-        <div class="card-hint">The output .xlsx from Weekly Balances Rollforward</div>
-        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
-        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+    <div class="section-label">Input Files</div>
+    <div class="upload-grid">
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s1_main">
+        <div class="card-label">Last Week's 13WCF Weekly Balances</div>
+        <div class="card-hint">.xlsx</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeS1File(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleS1Upload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s1_bank">
+        <div class="card-label">Find Bank Statements (Workday)</div>
+        <div class="card-hint">.xlsx</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeS1File(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleS1Upload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s1_snapshot">
+        <div class="card-label">All Snapshot Balances</div>
+        <div class="card-hint">.csv</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeS1File(this)">&times;</button></div>
+        <input type="file" accept=".csv" onchange="handleS1Upload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s1_defi">
+        <div class="card-label">All DeFi Balances</div>
+        <div class="card-hint">.csv</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeS1File(this)">&times;</button></div>
+        <input type="file" accept=".csv" onchange="handleS1Upload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s1_eod">
+        <div class="card-label">BTH EoD Balance on Bullish Exchange</div>
+        <div class="card-hint">.xlsx</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeS1File(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleS1Upload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s1_ccc">
+        <div class="card-label">CCC and CCD Bank & Cash (JPM)</div>
+        <div class="card-hint">.xlsx</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeS1File(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleS1Upload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s1_staticMap">
+        <div class="card-label">Static Mapping (Wallet & Ref Mapping)</div>
+        <div class="card-hint">.xlsx</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeS1File(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleS1Upload(this)">
       </div>
     </div>
 
+    <div class="api-key-section">
+      <div class="label-row">
+        <label>Anthropic API Key <span style="font-weight:400;text-transform:none;color:var(--text-dim)">(optional &mdash; FX fallback only)</span></label>
+        <button class="toggle-btn" onclick="toggleApiKeyVis()">show</button>
+      </div>
+      <input type="password" id="s1-api-key" placeholder="sk-ant-api03-...">
+      <div class="hint">FX rates are fetched from bankofcanada.ca. Only needed if that fails.</div>
+    </div>
+
     <div class="actions">
-      <button class="btn-primary" onclick="saveStep1Output()" id="btn-step1-save" disabled>Save & Continue to Step 2 &rarr;</button>
+      <button class="btn-primary" onclick="runStep1()" id="btn-run-1" disabled>Run All 6 Steps</button>
+      <button class="btn-download" id="btn-dl-1" onclick="downloadStep1Output()">Download Output</button>
+      <button class="btn-secondary" id="btn-next-1" onclick="showStep(2)" style="display:none">Continue to Step 2 &rarr;</button>
+    </div>
+
+    <div class="progress-panel" id="progress-1">
+      <div class="progress-header" id="progress-header-1"><div class="dot"></div><span>Processing...</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill-1"></div></div>
+      <div class="log-area" id="log-1"></div>
+    </div>
+
+    <div style="margin-top:10px;padding:10px 14px;border-radius:8px;background:#1a1200;border:1px solid rgba(253,189,91,0.2);font-size:11px;color:var(--yellow);display:none" id="s1-recalc-notice">
+      After downloading, open in Excel and press <strong>Ctrl+Alt+F9</strong> to recalculate all formulas.
     </div>
   </div>
 
@@ -721,21 +761,641 @@ function removeFile(btn) {
 }
 
 // ═══════════════════════════════════════════════════════
-// STEP 1: Save output and continue
+// STEP 1: Weekly Balances — In-Browser Processing
 // ═══════════════════════════════════════════════════════
-function saveStep1Output() {
-  const file = fileRegistry['step1_weekly_balances_output'];
-  if (!file) return;
+const s1Files = {};   // key -> ArrayBuffer
+const s1Names = {};   // key -> filename
+let s1Result = null;  // { data: Uint8Array, fileName: string }
+const S1_KEYS = ['s1_main','s1_bank','s1_snapshot','s1_defi','s1_eod','s1_ccc','s1_staticMap'];
 
-  const fd = new FormData();
-  fd.append('file', file);
-  fetch('/api/save-output/1', { method: 'POST', body: fd })
-    .then(r => r.json())
-    .then(data => {
-      serverFiles['step1_weekly_balances_output'] = data.saved;
-      setStepStatus(1, 'done');
-      showStep(2);
-    });
+function handleS1Upload(input) {
+  const card = input.closest('.upload-card');
+  const key = card.dataset.key;
+  const file = input.files[0];
+  if (!file) return;
+  card.classList.add('has-file');
+  card.querySelector('.fname').textContent = file.name;
+  s1Names[key] = file.name;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    s1Files[key] = e.target.result;
+    checkS1Ready();
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function removeS1File(btn) {
+  const card = btn.closest('.upload-card');
+  const key = card.dataset.key;
+  card.classList.remove('has-file');
+  card.querySelector('input[type="file"]').value = '';
+  card.querySelector('.fname').textContent = '';
+  delete s1Files[key];
+  delete s1Names[key];
+  checkS1Ready();
+}
+
+function checkS1Ready() {
+  const ready = S1_KEYS.every(k => s1Files[k]);
+  document.getElementById('btn-run-1').disabled = !ready;
+}
+
+function toggleApiKeyVis() {
+  const inp = document.getElementById('s1-api-key');
+  const btn = inp.parentElement.querySelector('.toggle-btn');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'hide'; }
+  else { inp.type = 'password'; btn.textContent = 'show'; }
+}
+
+/* ─── ZIP Utilities (browser-native) ─── */
+const _te = new TextEncoder();
+const _td = new TextDecoder();
+const _crcT = new Uint32Array(256);
+for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); _crcT[n] = c; }
+function _crc32(d) { let c = 0xFFFFFFFF; for (let i = 0; i < d.length; i++) c = _crcT[(c ^ d[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+async function _streamXform(data, xf) {
+  const w = xf.writable.getWriter(); w.write(data); w.close();
+  const r = xf.readable.getReader(); const ch = [];
+  while (true) { const { done, value } = await r.read(); if (done) break; ch.push(value); }
+  const tot = ch.reduce((a, c) => a + c.length, 0); const out = new Uint8Array(tot);
+  let o = 0; for (const c of ch) { out.set(c, o); o += c.length; } return out;
+}
+const _inflate = (d) => _streamXform(d, new DecompressionStream("deflate-raw"));
+const _deflate = (d) => _streamXform(d, new CompressionStream("deflate-raw"));
+
+function parseZipEntries(buf) {
+  const u8 = new Uint8Array(buf);
+  const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  let eocd = -1;
+  for (let i = u8.length - 22; i >= 0; i--) { if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; } }
+  if (eocd < 0) return { entries: [], u8, dv, eocdOff: -1 };
+  const cdOff = dv.getUint32(eocd + 16, true);
+  const num = dv.getUint16(eocd + 10, true);
+  const entries = []; let off = cdOff;
+  for (let i = 0; i < num; i++) {
+    if (dv.getUint32(off, true) !== 0x02014b50) break;
+    const method = dv.getUint16(off + 10, true);
+    const compSz = dv.getUint32(off + 20, true);
+    const uncompSz = dv.getUint32(off + 24, true);
+    const nL = dv.getUint16(off + 28, true);
+    const eL = dv.getUint16(off + 30, true);
+    const cL = dv.getUint16(off + 32, true);
+    const localOff = dv.getUint32(off + 42, true);
+    const name = _td.decode(u8.subarray(off + 46, off + 46 + nL));
+    entries.push({ name, method, compSz, uncompSz, localOff, cdOff: off, cdLen: 46 + nL + eL + cL });
+    off += 46 + nL + eL + cL;
+  }
+  return { entries, u8, dv, eocdOff: eocd };
+}
+
+async function zipReadFile(entry, u8, dv) {
+  const lnL = dv.getUint16(entry.localOff + 26, true);
+  const leL = dv.getUint16(entry.localOff + 28, true);
+  const dataOff = entry.localOff + 30 + lnL + leL;
+  const comp = u8.subarray(dataOff, dataOff + entry.compSz);
+  if (entry.method === 0) return comp;
+  if (entry.method === 8) return await _inflate(comp);
+  throw new Error("Unsupported compression: " + entry.method);
+}
+
+async function rebuildZip(parsed, replacements, skip) {
+  skip = skip || new Set();
+  const { entries, u8, dv, eocdOff } = parsed;
+  const patchMap = {};
+  for (const [name, rawBytes] of Object.entries(replacements)) {
+    const comp = await _deflate(rawBytes);
+    patchMap[name] = { newComp: comp, newCrc: _crc32(rawBytes), newUncompSz: rawBytes.length, newCompSz: comp.length };
+  }
+  const filtered = entries.filter(e => !skip.has(e.name));
+  const sorted = [...filtered].sort((a, b) => a.localOff - b.localOff);
+  const parts = []; const newOffsets = {};
+  for (const e of sorted) {
+    newOffsets[e.name] = parts.reduce((a, p) => a + p.length, 0);
+    const lnL = dv.getUint16(e.localOff + 26, true);
+    const leL = dv.getUint16(e.localOff + 28, true);
+    const hdrEnd = e.localOff + 30 + lnL + leL;
+    if (patchMap[e.name]) {
+      const pm = patchMap[e.name];
+      const hdr = new Uint8Array(30 + lnL + leL);
+      hdr.set(u8.subarray(e.localOff, hdrEnd));
+      const hv = new DataView(hdr.buffer);
+      const flags = hv.getUint16(6, true);
+      hv.setUint16(6, flags & ~0x0008, true);
+      hv.setUint16(8, 8, true);
+      hv.setUint32(14, pm.newCrc, true);
+      hv.setUint32(18, pm.newCompSz, true);
+      hv.setUint32(22, pm.newUncompSz, true);
+      parts.push(hdr); parts.push(pm.newComp);
+    } else {
+      parts.push(u8.subarray(e.localOff, hdrEnd + e.compSz));
+    }
+  }
+  const cdStart = parts.reduce((a, p) => a + p.length, 0);
+  for (const e of filtered) {
+    const cd = new Uint8Array(e.cdLen);
+    cd.set(u8.subarray(e.cdOff, e.cdOff + e.cdLen));
+    const cv = new DataView(cd.buffer);
+    cv.setUint32(42, newOffsets[e.name], true);
+    if (patchMap[e.name]) {
+      const pm = patchMap[e.name];
+      const cdFlags = cv.getUint16(8, true);
+      cv.setUint16(8, cdFlags & ~0x0008, true);
+      cv.setUint16(10, 8, true);
+      cv.setUint32(16, pm.newCrc, true);
+      cv.setUint32(20, pm.newCompSz, true);
+      cv.setUint32(24, pm.newUncompSz, true);
+    }
+    parts.push(cd);
+  }
+  const cdEnd = parts.reduce((a, p) => a + p.length, 0);
+  const eocdBuf = new Uint8Array(22);
+  eocdBuf.set(u8.subarray(eocdOff, eocdOff + 22));
+  const ev = new DataView(eocdBuf.buffer);
+  ev.setUint16(8, filtered.length, true);
+  ev.setUint16(10, filtered.length, true);
+  ev.setUint32(12, cdEnd - cdStart, true);
+  ev.setUint32(16, cdStart, true);
+  ev.setUint16(20, 0, true);
+  parts.push(eocdBuf);
+  const total = parts.reduce((a, p) => a + p.length, 0);
+  const result = new Uint8Array(total);
+  let wo = 0; for (const p of parts) { result.set(p, wo); wo += p.length; }
+  return result;
+}
+
+/* ─── Extract cell style maps from original XLSX ─── */
+async function extractCellStyleMaps(origBuf) {
+  const parsed = parseZipEntries(origBuf);
+  const { entries, u8, dv } = parsed;
+  const maps = {};
+  for (const e of entries) {
+    if (!e.name.startsWith("xl/worksheets/sheet") || !e.name.endsWith(".xml")) continue;
+    const raw = await zipReadFile(e, u8, dv);
+    const text = _td.decode(raw);
+    const map = {};
+    const re = /<c\s+r="([A-Z]+[0-9]+)"([^>]*?)(?:\s*\/>|>)/g;
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const sMatch = m[2].match(/\bs="(\d+)"/);
+      if (sMatch) map[m[1]] = sMatch[1];
+    }
+    if (Object.keys(map).length > 0) maps[e.name] = map;
+  }
+  return maps;
+}
+
+/* ─── Patch output XLSX ─── */
+async function patchXlsxOutput(origBuf, outBuf, cellStyleMaps) {
+  const origParsed = parseZipEntries(origBuf);
+  const outParsed  = parseZipEntries(outBuf);
+  const replacements = {};
+  for (const e of origParsed.entries) {
+    if (e.name === "xl/styles.xml" || e.name === "xl/theme/theme1.xml") {
+      const raw = await zipReadFile(e, origParsed.u8, origParsed.dv);
+      replacements[e.name] = raw;
+    }
+  }
+  for (const e of outParsed.entries) {
+    if (!e.name.startsWith("xl/worksheets/sheet") || !e.name.endsWith(".xml")) continue;
+    const raw = await zipReadFile(e, outParsed.u8, outParsed.dv);
+    let xml = _td.decode(raw);
+    let changed = false;
+    const origMap = cellStyleMaps[e.name];
+    if (origMap && Object.keys(origMap).length > 0) {
+      xml = xml.replace(/<c\s+r="([A-Z]+[0-9]+)"([^>]*?)(\/?>)/g, (match, addr, rest, close) => {
+        const origS = origMap[addr];
+        if (!origS) return match;
+        if (/\bs="\d+"/.test(rest)) return '<c r="'+addr+'"'+rest.replace(/\bs="\d+"/, 's="'+origS+'"')+close;
+        return '<c r="'+addr+'" s="'+origS+'"'+rest+close;
+      });
+      changed = true;
+    }
+    if (/(?<!_xlfn\.)MAXIFS\(/.test(xml)) {
+      xml = xml.replace(/(?<!_xlfn\.)MAXIFS\(/g, "_xlfn.MAXIFS(");
+      changed = true;
+    }
+    if (changed) replacements[e.name] = _te.encode(xml);
+  }
+  return await rebuildZip(outParsed, replacements);
+}
+
+/* ─── SheetJS cell helpers ─── */
+const s1addr    = (r, c) => XLSX.utils.encode_cell({ r, c });
+const s1getCell = (ws, r, c) => ws[s1addr(r, c)] || null;
+const s1getVal  = (ws, r, c) => { const x = s1getCell(ws, r, c); return x ? x.v : null; };
+const s1getNum  = (ws, r, c) => { const v = s1getVal(ws, r, c); return typeof v === "number" ? v : null; };
+const s1isForm  = (ws, r, c) => { const x = s1getCell(ws, r, c); return x && !!x.f; };
+const s1putNum  = (ws, r, c, v) => { ws[s1addr(r, c)] = { t: "n", v }; };
+const s1putStr  = (ws, r, c, v) => { ws[s1addr(r, c)] = { t: "s", v: String(v) }; };
+const s1delCell = (ws, r, c) => { delete ws[s1addr(r, c)]; };
+const s1endRC   = (ws) => ws["!ref"] ? XLSX.utils.decode_range(ws["!ref"]).e : { r: 0, c: 0 };
+const s1setRange= (ws, er, ec) => { ws["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: er, c: ec } }); };
+
+const s1fmtDate = (serial) => { const d = new Date(1899, 11, 30 + Math.round(serial)); return `${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")}/${d.getFullYear()}`; };
+const s1dateToSerial = (d) => Math.round((d - new Date(1899, 11, 30)) / 86400000);
+const s1serialToYMD = (serial) => { const d = new Date(1899, 11, 30 + Math.round(serial)); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+const s1parseDateStr = (s) => { if (!s) return null; const parts = s.split("/"); if (parts.length === 3) { return s1dateToSerial(new Date(parseInt(parts[2]), parseInt(parts[0])-1, parseInt(parts[1]))); } return null; };
+
+function s1parseCsv(buf) {
+  const txt = new TextDecoder("utf-8").decode(new Uint8Array(buf));
+  const lines = txt.split("\n");
+  let headerIdx = 0;
+  for (let i = 0; i < Math.min(lines.length, 20); i++) {
+    if (lines[i].includes("Entity Name") && lines[i].includes("Provider Name")) { headerIdx = i; break; }
+  }
+  return Papa.parse(lines.slice(headerIdx).join("\n"), { header: true, skipEmptyLines: true, dynamicTyping: false }).data;
+}
+
+function s1fixAtFormulas(wb) {
+  let count = 0;
+  for (const name of wb.SheetNames) {
+    const ws = wb.Sheets[name]; if (!ws) continue;
+    const range = XLSX.utils.decode_range(ws["!ref"] || "A1");
+    for (let r = range.s.r; r <= range.e.r; r++) {
+      for (let c = range.s.c; c <= range.e.c; c++) {
+        const a = XLSX.utils.encode_cell({ r, c });
+        const cell = ws[a];
+        if (cell && cell.f) {
+          const orig = cell.f;
+          cell.f = cell.f.replace(/_xlfn\._xlws\./g, "");
+          cell.f = cell.f.replace(/@/g, "");
+          cell.f = cell.f.replace(/(?<![A-Z._])MAXIFS\(/g, "_xlfn.MAXIFS(");
+          if (cell.f !== orig) count++;
+        }
+      }
+    }
+  }
+  return count;
+}
+
+/* ─── Step 1 sub-step: Roll Forward ─── */
+function s1_step1_rollForward(wb, log) {
+  const getSheet = (n) => { if (!wb.Sheets[n]) throw new Error("Sheet missing: "+n); return wb.Sheets[n]; };
+  const wCover = getSheet("Cover Page");
+  const b6 = s1getCell(wCover, 5, 1);
+  if (!b6 || typeof b6.v !== "number") throw new Error("Cover Page B6 is not a numeric date serial");
+  const oldSerial = b6.v, newSerial = oldSerial + 7;
+  wCover[s1addr(5, 1)] = { ...b6, v: newSerial };
+  log("Cover Page B6: " + s1fmtDate(oldSerial) + " -> " + s1fmtDate(newSerial));
+  const wUSD = getSheet("USDx Balances"); const uEnd = s1endRC(wUSD); let uRollCount = 0;
+  for (let r = 7; r <= uEnd.r; r++) { if (s1isForm(wUSD, r, 9)) continue; const kC = s1getCell(wUSD, r, 10); if (!kC) continue; if (kC.v != null && typeof kC.v === "number") { s1putNum(wUSD, r, 9, kC.v); uRollCount++; } }
+  log("USDx Balances: rolled " + uRollCount + " K->J values");
+  const wRef = getSheet("Ref Acct Balances Full Summary"); const rEnd = s1endRC(wRef); let rRollCount = 0;
+  for (let r = 7; r <= rEnd.r; r++) { if (s1isForm(wRef, r, 9)) continue; const kC = s1getCell(wRef, r, 10); if (!kC) continue; if (kC.v != null && typeof kC.v === "number") { s1putNum(wRef, r, 9, kC.v); rRollCount++; } }
+  log("Ref Acct Balances: rolled " + rRollCount + " K->J values");
+  return { oldSerial, newSerial };
+}
+
+/* ─── Step 1 sub-step: Bank Statements ─── */
+function s1_step2_bankStatements(wb, files, newSerial, log) {
+  const wBS = wb.Sheets["Find Bank Statements"]; if (!wBS) throw new Error("Sheet missing: Find Bank Statements");
+  const bsEnd = s1endRC(wBS);
+  const refMap = {};
+  for (let r = 7; r <= bsEnd.r; r++) { const acct = s1getVal(wBS, r, 3); const ref = s1getVal(wBS, r, 12); if (acct && ref != null) { const key = String(acct).trim(); if (!refMap[key]) refMap[key] = ref; } }
+  log("Bank: built ref mapping for " + Object.keys(refMap).length + " accounts");
+  const wFX = wb.Sheets["FX"]; const fxLookup = {};
+  if (wFX) { const fxEnd = s1endRC(wFX); for (let r = 10; r <= fxEnd.r; r++) { const dv = s1getNum(wFX, r, 1); const rate = s1getNum(wFX, r, 2); const curr = s1getVal(wFX, r, 3); if (dv != null && rate != null && curr) fxLookup[s1serialToYMD(dv)+"|"+String(curr).trim()] = rate; } }
+  log("Bank: loaded " + Object.keys(fxLookup).length + " FX rate entries");
+  const getFX = (ds, cu) => { cu = String(cu||"USD").trim(); if (cu==="USD") return 1; for (let o=0;o<=7;o++){const r=fxLookup[s1serialToYMD(ds-o)+"|"+cu];if(r!=null)return r;} return 1; };
+  const bkWB = XLSX.read(files.s1_bank, { type: "array" }); const bkSheet = bkWB.Sheets[bkWB.SheetNames[0]]; const bkEnd = s1endRC(bkSheet);
+  const inputRows = []; for (let r = 1; r <= bkEnd.r; r++) { if (s1getVal(bkSheet, r, 0) != null) inputRows.push(r); }
+  log("Bank: " + inputRows.length + " input rows from Workday extract");
+  const maxCol = 14;
+  for (let r = 7; r <= bsEnd.r; r++) for (let c = 0; c <= maxCol; c++) s1delCell(wBS, r, c);
+  let writeRow = 7, addedCount = 0; const seenRecords = new Set();
+  for (const srcR of inputRows) {
+    const bankStatement = s1getVal(bkSheet, srcR, 0); const company = s1getVal(bkSheet, srcR, 1); const status = s1getVal(bkSheet, srcR, 2);
+    const bankAccount = s1getVal(bkSheet, srcR, 3); const dateCellVal = s1getCell(bkSheet, srcR, 4); const currency = s1getVal(bkSheet, srcR, 5);
+    const beginBal = s1getVal(bkSheet, srcR, 6); const endBal = s1getVal(bkSheet, srcR, 7); const entryType = s1getVal(bkSheet, srcR, 8);
+    const reconStatus = s1getVal(bkSheet, srcR, 9); const unreconCount = s1getVal(bkSheet, srcR, 10); const totalTxnCount = s1getVal(bkSheet, srcR, 11);
+    const recordKey = bankAccount+"|"+(dateCellVal?dateCellVal.v:"")+"|"+currency;
+    if (seenRecords.has(recordKey)) continue; seenRecords.add(recordKey);
+    const acctKey = bankAccount ? String(bankAccount).trim() : "";
+    const dateSerial = dateCellVal && typeof dateCellVal.v === "number" ? dateCellVal.v : null;
+    if (bankStatement != null) s1putStr(wBS, writeRow, 0, String(bankStatement));
+    if (company != null) s1putStr(wBS, writeRow, 1, String(company));
+    if (status != null) s1putStr(wBS, writeRow, 2, String(status));
+    if (bankAccount != null) s1putStr(wBS, writeRow, 3, String(bankAccount));
+    if (dateCellVal) wBS[s1addr(writeRow, 4)] = { ...dateCellVal };
+    if (currency != null) s1putStr(wBS, writeRow, 5, String(currency));
+    if (beginBal != null) { const num = typeof beginBal === "number" ? beginBal : parseFloat(String(beginBal).replace(/,/g, "")); if (!isNaN(num)) s1putNum(wBS, writeRow, 6, num); }
+    const endBalNum = typeof endBal === "number" ? endBal : parseFloat(String(endBal || "0").replace(/,/g, ""));
+    if (!isNaN(endBalNum)) s1putNum(wBS, writeRow, 7, endBalNum);
+    if (entryType != null) s1putStr(wBS, writeRow, 8, String(entryType));
+    if (reconStatus != null) s1putStr(wBS, writeRow, 9, String(reconStatus));
+    if (unreconCount != null) { const num = typeof unreconCount === "number" ? unreconCount : parseFloat(String(unreconCount)); if (!isNaN(num)) s1putNum(wBS, writeRow, 10, num); }
+    if (totalTxnCount != null) { const num = typeof totalTxnCount === "number" ? totalTxnCount : parseFloat(String(totalTxnCount)); if (!isNaN(num)) s1putNum(wBS, writeRow, 11, num); }
+    const ref = refMap[acctKey];
+    if (ref != null) { if (typeof ref === "number") s1putNum(wBS, writeRow, 12, ref); else s1putStr(wBS, writeRow, 12, String(ref)); } else { s1putStr(wBS, writeRow, 12, "Not Mapped"); }
+    const cu = String(currency || "USD").trim();
+    const fxRate = (cu === "USD") ? 1 : (dateSerial != null ? getFX(dateSerial, cu) : 1);
+    s1putNum(wBS, writeRow, 13, fxRate);
+    s1putNum(wBS, writeRow, 14, (isNaN(endBalNum) ? 0 : endBalNum) * fxRate);
+    writeRow++; addedCount++;
+  }
+  s1setRange(wBS, writeRow - 1, maxCol);
+  log("Bank: wrote " + addedCount + " rows (full overwrite A8:O)");
+}
+
+/* ─── Step 1 sub-step: Snapshot Balances ─── */
+function s1_step3_snapshot(wb, files, newSerial, log) {
+  const wSnap = wb.Sheets["Daily Snapshot Balance Reconcil"]; if (!wSnap) throw new Error("Sheet missing: Daily Snapshot Balance Reconcil");
+  const snapEnd = s1endRC(wSnap);
+  const refMap = {};
+  for (let r = 8; r <= snapEnd.r; r++) {
+    const acct = s1getVal(wSnap, r, 2)||""; const sub = s1getVal(wSnap, r, 3)||""; const asset = s1getVal(wSnap, r, 4)||"";
+    if (!acct && !asset) continue;
+    refMap[acct+"|"+sub+"|"+asset] = { O: s1getVal(wSnap, r, 14), P: s1getVal(wSnap, r, 15), Q: s1getVal(wSnap, r, 16), R: s1getVal(wSnap, r, 17), S: s1getVal(wSnap, r, 18), T: s1getVal(wSnap, r, 19), U: s1getVal(wSnap, r, 20) };
+  }
+  log("Snap: built ref mapping for " + Object.keys(refMap).length + " keys");
+  const smWB = XLSX.read(files.s1_staticMap, { type: "array" });
+  const walletMap = {}; const wsWM = smWB.Sheets["Wallet Mapping"];
+  if (wsWM) { const wmEnd = s1endRC(wsWM); for (let r = 2; r <= wmEnd.r; r++) { const name = s1getVal(wsWM, r, 0); if (!name) continue; walletMap[String(name)] = { Enterprise: String(s1getVal(wsWM, r, 2)||""), House: String(s1getVal(wsWM, r, 4)||""), Vendor: String(s1getVal(wsWM, r, 5)||"") }; } }
+  log("Snap: loaded " + Object.keys(walletMap).length + " wallet mappings");
+  const entToAcctType = {}; const wsLE = smWB.Sheets["Legal Entity to Enterprise"];
+  if (wsLE) { const leEnd = s1endRC(wsLE); for (let r = 2; r <= leEnd.r; r++) { const ent = s1getVal(wsLE, r, 4); const at = s1getVal(wsLE, r, 5); if (ent) entToAcctType[String(ent)] = String(at||""); } }
+  const refIdLookup = {}; const wsBLR = smWB.Sheets["Bal Lukka Ref Mapping"];
+  if (wsBLR) { const blrEnd = s1endRC(wsBLR); for (let r = 1; r <= blrEnd.r; r++) { const rid = s1getVal(wsBLR, r, 7); const ref = s1getVal(wsBLR, r, 8); if (rid) refIdLookup[String(rid)] = ref; } }
+  log("Snap: loaded " + Object.keys(refIdLookup).length + " Ref ID mappings");
+  const snapData = s1parseCsv(files.s1_snapshot);
+  log("Snap: parsed " + snapData.length + " rows from CSV");
+  const nd = new Date(1899, 11, 30 + Math.round(newSerial));
+  const targetDate = nd.getFullYear()+"-"+String(nd.getMonth()+1).padStart(2,"0")+"-"+String(nd.getDate()).padStart(2,"0");
+  log("Snap: target date = " + targetDate);
+  const filtered = snapData.filter(r => { const bd = r["Balance Date"]||""; const acct = r["Account Name"]||""; return bd.startsWith(targetDate) && acct !== "Bitgo_2025_v2"; });
+  log("Snap: " + filtered.length + " rows for " + targetDate);
+  const groupMax = {};
+  for (const r of filtered) { const key = [r["Entity Name"]||"",r["Provider Name"]||"",r["Account Name"]||"",r["Sub-Account Name"]||"",r["Asset Code"]||"",r["Asset Name"]||""].join("|"); const bd = r["Balance Date"]||""; if (!groupMax[key] || bd > groupMax[key].maxBD) groupMax[key] = { maxBD: bd }; }
+  const finalRows = [];
+  for (const r of filtered) { const key = [r["Entity Name"]||"",r["Provider Name"]||"",r["Account Name"]||"",r["Sub-Account Name"]||"",r["Asset Code"]||"",r["Asset Name"]||""].join("|"); const bd = r["Balance Date"]||""; if (groupMax[key] && bd === groupMax[key].maxBD) finalRows.push(r); }
+  log("Snap: " + finalRows.length + " rows after Max(Balance Date) dedup");
+  for (let r = 8; r <= snapEnd.r; r++) for (let c = 0; c <= 20; c++) s1delCell(wSnap, r, c);
+  const colMap = { "Entity Name": 0, "Provider Name": 1, "Account Name": 2, "Sub-Account Name": 3, "Asset Code": 4, "Asset Name": 5, "Total Balance": 6, "Price (FIAT)": 7, "Total Value (FIAT)": 8, "Price Time": 9, "Price Source": 10, "Reference Currency": 11, "Equity": 12, "Balance Date": 13 };
+  for (let i = 0; i < finalRows.length; i++) {
+    const writeR = 8 + i; const csvRow = finalRows[i];
+    for (const [csvCol, sheetCol] of Object.entries(colMap)) { let val = csvRow[csvCol]; if (val == null || val === "") continue; if (sheetCol === 6 || sheetCol === 7 || sheetCol === 8) { const num = parseFloat(String(val).replace(/,/g, "")); if (!isNaN(num)) { s1putNum(wSnap, writeR, sheetCol, num); continue; } } s1putStr(wSnap, writeR, sheetCol, String(val)); }
+    const acct = csvRow["Account Name"]||""; const sub = csvRow["Sub-Account Name"]||""; const asset = csvRow["Asset Code"]||"";
+    const key = acct+"|"+sub+"|"+asset; const ref = refMap[key];
+    if (ref) {
+      if (ref.O != null) s1putStr(wSnap, writeR, 14, String(ref.O)); if (ref.P != null) s1putStr(wSnap, writeR, 15, String(ref.P));
+      if (ref.Q != null) s1putStr(wSnap, writeR, 16, String(ref.Q)); if (ref.R != null) s1putStr(wSnap, writeR, 17, String(ref.R));
+      if (ref.S != null) s1putStr(wSnap, writeR, 18, String(ref.S)); if (ref.T != null) s1putNum(wSnap, writeR, 19, typeof ref.T === "number" ? ref.T : 0);
+      if (ref.U != null) s1putStr(wSnap, writeR, 20, String(ref.U));
+    } else {
+      const concatSub = acct + sub; const isCB = acct.startsWith("CB");
+      let wm = null;
+      if (isCB) { wm = sub.endsWith("Trading Balance") ? walletMap[acct] : walletMap[concatSub]; }
+      else if (!sub) { wm = walletMap[acct]; } else { wm = walletMap[concatSub] || walletMap[sub]; }
+      const entVal = wm ? wm.Enterprise : ""; const hcVal = wm ? wm.House : ""; const vendVal = wm ? wm.Vendor : "";
+      const atVal = entVal ? (entToAcctType[entVal]||"") : "";
+      if (entVal) s1putStr(wSnap, writeR, 14, entVal); if (hcVal) s1putStr(wSnap, writeR, 15, hcVal);
+      if (vendVal) s1putStr(wSnap, writeR, 16, vendVal); if (atVal) s1putStr(wSnap, writeR, 17, atVal);
+      const sVal = acct+sub+asset+entVal+hcVal+vendVal+atVal;
+      s1putStr(wSnap, writeR, 18, sVal);
+      const refNum = refIdLookup[sVal]; s1putNum(wSnap, writeR, 19, typeof refNum === "number" ? refNum : (parseFloat(refNum) || 0));
+      const isRevMargin = sub.includes("PROD") && (sub.includes("Revenue") || sub.includes("Margin"));
+      const isStable = ["USD","USDC","USDT","RLUSD","RLUSD1","PYUSD","PYUSD1","PYUSD2"].includes(asset);
+      s1putStr(wSnap, writeR, 20, (isRevMargin && isStable) ? "Check" : "Pass");
+    }
+  }
+  s1setRange(wSnap, 8 + finalRows.length - 1, 20);
+  log("Snap: wrote " + finalRows.length + " rows (full overwrite A9:U)");
+}
+
+/* ─── Step 1 sub-step: CCC Balances ─── */
+function s1_step4_cccBalances(wb, files, log) {
+  const wCCC = wb.Sheets["CCC and CCD Balances"]; if (!wCCC) throw new Error("Sheet missing: CCC and CCD Balances");
+  const cccWB = XLSX.read(files.s1_ccc, { type: "array", cellFormula: false });
+  const leadSheet = cccWB.Sheets["Lead"]; if (!leadSheet) throw new Error("Lead sheet not found in CCC input file");
+  const leadEnd = s1endRC(leadSheet);
+  let headerRow = -1;
+  for (let r = 0; r <= leadEnd.r; r++) { const val = s1getVal(leadSheet, r, 0); if (val && String(val).trim().toLowerCase().includes("bank")) { headerRow = r; break; } }
+  if (headerRow === -1) throw new Error("Could not find 'Bank' header row in Lead sheet");
+  const colAH = String(s1getVal(leadSheet, headerRow, 0)||"Bank").trim();
+  const colBH = String(s1getVal(leadSheet, headerRow, 1)||"JPM").trim();
+  log("CCC: Found headers at row " + (headerRow+1) + ': "'+colAH+'", "'+colBH+'"');
+  const dataRows = [];
+  for (let r = headerRow + 1; r <= leadEnd.r; r++) { const a = s1getVal(leadSheet, r, 0); const b = s1getVal(leadSheet, r, 1); if (a == null && b == null) continue; dataRows.push({ label: a ? String(a).trim() : "", value: typeof b === "number" ? b : (b ? parseFloat(String(b).replace(/,/g, "")) : null) }); }
+  log("CCC: Found " + dataRows.length + " data rows in Lead sheet");
+  const cccEnd = s1endRC(wCCC);
+  for (let r = 0; r <= cccEnd.r; r++) for (let c = 0; c <= cccEnd.c; c++) s1delCell(wCCC, r, c);
+  s1putStr(wCCC, 0, 0, colAH); s1putStr(wCCC, 0, 1, colBH);
+  for (let i = 0; i < dataRows.length; i++) { const wr = 1+i; if (dataRows[i].label) s1putStr(wCCC, wr, 0, dataRows[i].label); if (dataRows[i].value != null && !isNaN(dataRows[i].value)) s1putNum(wCCC, wr, 1, dataRows[i].value); }
+  s1setRange(wCCC, dataRows.length, 1);
+  log("CCC: wrote " + dataRows.length + " rows");
+}
+
+/* ─── Step 1 sub-step: EoD Balances ─── */
+function s1_step5_eodBalances(wb, files, log) {
+  const wEoD = wb.Sheets["EoD Balances on Exchange"]; if (!wEoD) throw new Error("Sheet missing: EoD Balances on Exchange");
+  const bthWB = XLSX.read(files.s1_eod, { type: "array" }); const bthSheet = bthWB.Sheets[bthWB.SheetNames[0]]; const bthEnd = s1endRC(bthSheet);
+  const bthRows = []; let currentDate = null;
+  for (let r = 1; r <= bthEnd.r; r++) {
+    const col0 = s1getVal(bthSheet, r, 0); const col1 = s1getVal(bthSheet, r, 1);
+    if (col1 === "symbol" || String(col1||"").toLowerCase() === "total" || col1 == null || String(col1).trim() === "") continue;
+    if (col0 != null) { const parsed = s1parseDateStr(String(col0).trim()); if (parsed != null) currentDate = parsed; }
+    if (currentDate == null) continue;
+    bthRows.push({ dateSerial: currentDate, symbol: col1, spot_balance_ccy: s1getVal(bthSheet, r, 2), amm_balance_ccy: s1getVal(bthSheet, r, 3), loan_balance_ccy: s1getVal(bthSheet, r, 4), uoi_allotted_ccy: s1getVal(bthSheet, r, 5), spot_balance_usd: s1getVal(bthSheet, r, 6), amm_balance_usd: s1getVal(bthSheet, r, 7), loan_balance_usd: s1getVal(bthSheet, r, 8), uoi_allotted_usd: s1getVal(bthSheet, r, 9) });
+  }
+  log("EoD: parsed " + bthRows.length + " rows");
+  const eodEnd = s1endRC(wEoD);
+  for (let r = 8; r <= eodEnd.r; r++) for (let c = 1; c <= 10; c++) s1delCell(wEoD, r, c);
+  for (let i = 0; i < bthRows.length; i++) {
+    const wr = 8+i; const d = bthRows[i];
+    wEoD[s1addr(wr, 1)] = { t: "n", v: d.dateSerial, z: "m/d/yyyy" };
+    s1putStr(wEoD, wr, 2, String(d.symbol));
+    const nf = [[3,d.spot_balance_ccy],[4,d.amm_balance_ccy],[5,d.loan_balance_ccy],[6,d.uoi_allotted_ccy],[7,d.spot_balance_usd],[8,d.amm_balance_usd],[9,d.loan_balance_usd],[10,d.uoi_allotted_usd]];
+    for (const [col, val] of nf) { const num = typeof val === "number" ? val : parseFloat(String(val||"0").replace(/,/g,"")); s1putNum(wEoD, wr, col, isNaN(num) ? 0 : num); }
+  }
+  s1setRange(wEoD, Math.max(eodEnd.r, 8+bthRows.length-1), Math.max(eodEnd.c, 10));
+  log("EoD: wrote " + bthRows.length + " rows");
+}
+
+/* ─── Step 1 sub-step: FX Rates ─── */
+async function s1_step6_fx(wb, newSerial, log, anthropicKey) {
+  const wFX = wb.Sheets["FX"]; if (!wFX) { log("FX: tab not found, skipping"); return; }
+  const fxEnd = s1endRC(wFX);
+  const fmtD = (d) => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  let maxSerial = 0;
+  for (let r = 10; r <= fxEnd.r; r++) { const d = s1getNum(wFX, r, 1); if (d != null && d > maxSerial) maxSerial = d; }
+  const coverSerial = Math.round(newSerial);
+  const coverDate = new Date(1899, 11, 30 + coverSerial);
+  const lastFxDate = maxSerial > 0 ? new Date(1899, 11, 30 + maxSerial) : null;
+  log("FX: Cover page = " + fmtD(coverDate) + ", Last FX = " + (lastFxDate ? fmtD(lastFxDate) : "none"));
+  if (maxSerial >= coverSerial) { log("FX: Up to date"); return; }
+  const startSerial = Math.max(maxSerial + 1 - 7, coverSerial - 90);
+  const startDate = new Date(1899, 11, 30 + startSerial);
+  const startStr = fmtD(startDate); const endStr = fmtD(coverDate);
+  log("FX: Need BoC rates " + startStr + " to " + endStr);
+
+  let observations = null;
+  try {
+    log("FX: Fetching from Bank of Canada API...");
+    const proxyUrl = "/api/boc-fx?start_date="+startStr+"&end_date="+endStr;
+    const directUrl = "https://www.bankofcanada.ca/valet/observations/group/FX_RATES_DAILY/json?start_date="+startStr+"&end_date="+endStr;
+    let resp = await fetch(proxyUrl).catch(() => null);
+    if (!resp || !resp.ok) { log("FX: Proxy fetch failed, trying direct..."); resp = await fetch(directUrl); }
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    observations = data.observations || [];
+    if (observations.length === 0) throw new Error("BoC returned 0 observations");
+    log("FX: Got " + observations.length + " observations from Bank of Canada");
+  } catch (e) {
+    log("FX: BoC fetch failed: " + e.message);
+    if (!anthropicKey) { log("FX: No Anthropic API key — FX tab not updated"); return; }
+    log("FX: Falling back to Anthropic API web_search...");
+    const bocUrl = "https://www.bankofcanada.ca/valet/observations/group/FX_RATES_DAILY/json?start_date="+startStr+"&end_date="+endStr;
+    try {
+      let messages = [{ role: "user", content: "Search bankofcanada.ca for daily FX rates from "+startStr+" to "+endStr+".\n\nI need: FXUSDCAD, FXEURCAD, FXGBPCAD, FXSGDCAD, FXHKDCAD for each business day.\n\nBank of Canada Valet API URL: "+bocUrl+"\n\nReturn ONLY this JSON format:\n[{\"d\":\""+startStr+"\",\"FXUSDCAD\":1.4380,\"FXEURCAD\":1.5050,\"FXGBPCAD\":1.8200,\"FXSGDCAD\":1.0600,\"FXHKDCAD\":0.1835}]\n\nEvery value MUST be the actual Bank of Canada published rate. Do NOT estimate." }];
+      let finalText = ""; let attempts = 0;
+      while (attempts < 6) {
+        attempts++; log("FX: Anthropic API call #"+attempts+"...");
+        const reqBody = { model: "claude-sonnet-4-20250514", max_tokens: 4096, system: "You retrieve exchange rate data from the Bank of Canada. Use web_search to find ACTUAL published daily FX rates from bankofcanada.ca for the requested dates. Bank of Canada rates are expressed as CAD per 1 unit of foreign currency. After searching, respond with ONLY a JSON array. NO markdown, NO backticks, NO explanation.", tools: [{ type: "web_search_20250305", name: "web_search" }], messages };
+        if (attempts === 1) reqBody.tool_choice = { type: "any" };
+        const apiResp = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": anthropicKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" }, body: JSON.stringify(reqBody) });
+        if (!apiResp.ok) { const errText = await apiResp.text().catch(()=>""); throw new Error("HTTP "+apiResp.status+": "+errText.substring(0,200)); }
+        const data = await apiResp.json(); const blocks = data.content || [];
+        log("FX: stop="+data.stop_reason+", blocks=["+blocks.map(b=>b.type).join(",")+"]");
+        for (const b of blocks) { if (b.type === "text" && b.text) finalText += b.text + "\n"; }
+        if (data.stop_reason === "end_turn") { log("FX: Completed after "+attempts+" call(s)"); break; }
+        if (data.stop_reason === "tool_use") { messages.push({ role: "assistant", content: blocks }); messages.push({ role: "user", content: [{ type: "text", text: "Now output ONLY the JSON array. Start with [ end with ]." }] }); continue; }
+        break;
+      }
+      const cleaned = finalText.replace(/```json\s*/gi, "").replace(/```\s*/gi, "").trim();
+      try { const p = JSON.parse(cleaned); observations = Array.isArray(p) ? p : (p.observations || null); } catch(e2) {}
+      if (!observations) {
+        let brackets = 0, arrStart = -1, arrEnd = -1;
+        for (let i = 0; i < cleaned.length; i++) { if (cleaned[i] === "[") { if (brackets === 0) arrStart = i; brackets++; } else if (cleaned[i] === "]") { brackets--; if (brackets === 0 && arrStart >= 0) { arrEnd = i + 1; break; } } }
+        if (arrStart >= 0 && arrEnd > arrStart) { try { observations = JSON.parse(cleaned.substring(arrStart, arrEnd)); } catch(e3) { log("FX: parse failed: "+e3.message); } }
+      }
+      if (!observations || observations.length === 0) throw new Error("No observations parsed from Anthropic response");
+      log("FX: Parsed " + observations.length + " observations via Anthropic");
+    } catch (e2) { log("FX: Anthropic fallback failed: "+e2.message); log("FX: FX tab not updated"); return; }
+  }
+
+  const allowedCurrencies = new Set(["USD","EUR","GBP","SGD","HKD","KYD","CAD"]);
+  const newRecords = []; let skippedNoUSD = 0;
+  for (const obs of observations) {
+    const dateStr = obs.d; if (!dateStr) continue;
+    const parts = dateStr.split("-");
+    const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+    const serial = s1dateToSerial(d);
+    if (serial <= maxSerial || serial > coverSerial) continue;
+    const rawUSD = obs.FXUSDCAD;
+    const fxusdcad = parseFloat(typeof rawUSD === "object" && rawUSD?.v ? rawUSD.v : rawUSD);
+    if (isNaN(fxusdcad) || fxusdcad <= 0) { skippedNoUSD++; continue; }
+    const usdMult = 1 / fxusdcad;
+    newRecords.push({ date: dateStr, close: 1, currency: "USD" });
+    newRecords.push({ date: dateStr, close: usdMult, currency: "CAD" });
+    for (const key of ["FXEURCAD","FXGBPCAD","FXSGDCAD","FXHKDCAD","FXKYDCAD"]) {
+      const rawVal = obs[key]; if (rawVal == null) continue;
+      const fxcurCad = parseFloat(typeof rawVal === "object" && rawVal?.v ? rawVal.v : rawVal);
+      if (isNaN(fxcurCad) || fxcurCad <= 0) continue;
+      const currency = key.substring(2, key.length - 3);
+      if (!allowedCurrencies.has(currency)) continue;
+      newRecords.push({ date: dateStr, close: fxcurCad * usdMult, currency });
+    }
+  }
+  if (skippedNoUSD > 0) log("FX: Skipped " + skippedNoUSD + " observations without FXUSDCAD");
+  if (newRecords.length > 0) {
+    newRecords.sort((a, b) => a.date.localeCompare(b.date) || a.currency.localeCompare(b.currency));
+    let writeRow = fxEnd.r + 1; if (writeRow < 10) writeRow = 10;
+    for (let i = 0; i < newRecords.length; i++) {
+      const wr = writeRow+i; const rec = newRecords[i];
+      const ps = rec.date.split("-"); const dd = new Date(parseInt(ps[0]),parseInt(ps[1])-1,parseInt(ps[2]));
+      wFX[s1addr(wr, 1)] = { t: "n", v: s1dateToSerial(dd), z: "yyyy-mm-dd" };
+      s1putNum(wFX, wr, 2, rec.close); s1putStr(wFX, wr, 3, rec.currency);
+    }
+    s1setRange(wFX, writeRow + newRecords.length - 1, 3);
+    const uniqueDates = [...new Set(newRecords.map(r => r.date))].sort();
+    const currencies = [...new Set(newRecords.map(r => r.currency))].sort();
+    log("FX: Appended " + newRecords.length + " records (" + uniqueDates.length + " dates x " + currencies.length + " currencies)");
+  } else { log("FX: No valid new records — FX tab not updated"); }
+}
+
+/* ─── Step 1 Main Orchestrator ─── */
+async function s1_run(files, setStepSt, log, anthropicKey) {
+  log("Extracting formatting from original file...");
+  const cellStyleMaps = await extractCellStyleMaps(files.s1_main);
+  const styleCount = Object.values(cellStyleMaps).reduce((a, m) => a + Object.keys(m).length, 0);
+  log("Preserved " + styleCount + " cell styles across " + Object.keys(cellStyleMaps).length + " sheets");
+  const wb = XLSX.read(files.s1_main, { type: "array", cellFormula: true, cellStyles: true, bookVBA: true, cellNF: true, sheetStubs: true });
+  log("Loaded workbook: " + wb.SheetNames.length + " sheets");
+  setStepSt(1, "run"); const { newSerial } = s1_step1_rollForward(wb, log); setStepSt(1, "ok");
+  setStepSt(6, "run"); await s1_step6_fx(wb, newSerial, log, anthropicKey); setStepSt(6, "ok");
+  setStepSt(2, "run"); s1_step2_bankStatements(wb, files, newSerial, log); setStepSt(2, "ok");
+  setStepSt(3, "run"); s1_step3_snapshot(wb, files, newSerial, log); setStepSt(3, "ok");
+  setStepSt(4, "run"); s1_step4_cccBalances(wb, files, log); setStepSt(4, "ok");
+  setStepSt(5, "run"); s1_step5_eodBalances(wb, files, log); setStepSt(5, "ok");
+  const fixedCount = s1fixAtFormulas(wb);
+  log("Fixed " + fixedCount + " formulas at SheetJS level");
+  let outBuf = XLSX.write(wb, { type: "array", bookType: "xlsx", cellStyles: true });
+  try { outBuf = await patchXlsxOutput(files.s1_main, outBuf, cellStyleMaps); log("ZIP-patched: restored formatting + fixed _xlfn.MAXIFS"); } catch (e) { log("WARNING: ZIP patch failed: " + e.message); }
+  const nd = new Date(1899, 11, 30 + Math.round(newSerial));
+  const ds = String(nd.getMonth()+1).padStart(2,"0")+"_"+String(nd.getDate()).padStart(2,"0")+"_"+nd.getFullYear();
+  return { data: outBuf, fileName: "13WCF_Weekly_Balances_-_"+ds+"_Forecast.xlsx" };
+}
+
+/* ─── Run Step 1 Button Handler ─── */
+async function runStep1() {
+  const btn = document.getElementById('btn-run-1');
+  btn.disabled = true; btn.textContent = 'Processing...';
+  const panel = document.getElementById('progress-1');
+  panel.classList.add('visible');
+  const logEl = document.getElementById('log-1');
+  logEl.innerHTML = '';
+  document.getElementById('progress-header-1').className = 'progress-header';
+  document.getElementById('progress-header-1').querySelector('span').textContent = 'Processing...';
+  document.getElementById('progress-fill-1').style.width = '0%';
+  setStepStatus(1, 'running');
+  s1Result = null;
+
+  const totalSubSteps = 6; let doneSubSteps = 0;
+  const log = (msg) => { addLog(1, msg); };
+  const setStepSt = (id, st) => {
+    if (st === "ok") { doneSubSteps++; document.getElementById('progress-fill-1').style.width = Math.round((doneSubSteps/totalSubSteps)*100)+'%'; }
+  };
+
+  try {
+    const apiKey = document.getElementById('s1-api-key').value.trim() || null;
+    s1Result = await s1_run(s1Files, setStepSt, log, apiKey);
+    log("Done! Output: " + (s1Result.data.byteLength / 1024).toFixed(0) + " KB");
+    document.getElementById('progress-fill-1').style.width = '100%';
+    document.getElementById('progress-header-1').className = 'progress-header done';
+    document.getElementById('progress-header-1').querySelector('span').textContent = 'Complete';
+    document.getElementById('btn-dl-1').classList.add('visible');
+    document.getElementById('btn-next-1').style.display = '';
+    document.getElementById('s1-recalc-notice').style.display = 'block';
+    setStepStatus(1, 'done');
+
+    // Upload the output to the server so Step 4 can use it
+    const blob = new Blob([new Uint8Array(s1Result.data)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const fd = new FormData();
+    fd.append('file', blob, s1Result.fileName);
+    fetch('/api/save-output/1', { method: 'POST', body: fd })
+      .then(r => r.json())
+      .then(data => { serverFiles['step1_weekly_balances_output'] = data.saved; });
+
+  } catch (e) {
+    log("ERROR: " + e.message);
+    document.getElementById('progress-header-1').className = 'progress-header error';
+    document.getElementById('progress-header-1').querySelector('span').textContent = 'Error';
+    setStepStatus(1, 'error');
+  }
+  btn.disabled = false; btn.textContent = 'Re-run';
+  checkS1Ready();
+}
+
+function downloadStep1Output() {
+  if (!s1Result) return;
+  const bytes = new Uint8Array(s1Result.data);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 8192)
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+  const a = document.createElement("a");
+  a.href = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," + btoa(bin);
+  a.download = s1Result.fileName;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
 // ═══════════════════════════════════════════════════════
