@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13WCF Unified Workflow</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --green: #18E589;
+  --blue: #2870E6;
+  --purple: #A456EA;
+  --yellow: #FDBD5B;
+  --red: #D04E59;
+  --bg: #0A0A0A;
+  --bg-card: #141414;
+  --bg-hover: #1C1C1C;
+  --border: #2A2A2A;
+  --text: #FFFFFF;
+  --text-muted: #9E9E9E;
+  --text-dim: #6B6B6B;
+  --surface: #1A1A1A;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 280px;
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #111 0%, var(--bg) 100%);
+  flex-shrink: 0;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+.sidebar-header {
+  padding: 0 24px 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.sidebar-header .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.sidebar-header .logo-mark {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--green), var(--blue));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px; color: #000;
+}
+.sidebar-header h1 { font-size: 18px; font-weight: 600; }
+.sidebar-header h1 span { color: var(--green); }
+.sidebar-header .badge {
+  font-size: 11px; color: var(--text-muted);
+  background: var(--surface); padding: 3px 8px;
+  border-radius: 12px; border: 1px solid var(--border);
+  display: inline-block; margin-top: 6px;
+}
+
+.step-nav { flex: 1; padding: 8px 12px; overflow-y: auto; }
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+}
+.step-item:hover { background: var(--bg-hover); }
+.step-item.active { background: rgba(24,229,137,0.06); border-color: var(--green); }
+.step-item.done .step-num { background: var(--green); color: #000; }
+.step-item.error .step-num { background: var(--red); }
+.step-item.running .step-num { background: var(--yellow); color: #000; animation: pulse 1.5s infinite; }
+
+.step-num {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px;
+  background: var(--surface);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.step-item.active .step-num { border-color: var(--green); color: var(--green); }
+.step-info { flex: 1; min-width: 0; }
+.step-label { font-size: 13px; font-weight: 600; }
+.step-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.step-item.done .step-sub { color: var(--green); }
+.step-item.error .step-sub { color: var(--red); }
+
+.step-connector {
+  width: 2px; height: 12px;
+  background: var(--border);
+  margin-left: 27px;
+  margin-bottom: 4px;
+}
+
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+.reset-btn {
+  width: 100%;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.reset-btn:hover { color: var(--red); border-color: var(--red); }
+
+/* ── Main content ── */
+.main {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.step-panel { display: none; }
+.step-panel.active { display: block; }
+
+.panel-header {
+  margin-bottom: 32px;
+}
+.panel-header h2 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+.panel-header p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+
+.section-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--green); margin-bottom: 14px;
+}
+
+/* ── Upload cards ── */
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.upload-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.upload-grid.cols-1 { grid-template-columns: 1fr; }
+
+.upload-card {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.upload-card:hover { background: var(--bg-hover); border-color: #444; }
+.upload-card.has-file { border-style: solid; border-color: var(--green); background: rgba(24,229,137,0.04); }
+.upload-card.auto-filled { border-color: var(--blue); background: rgba(40,112,230,0.04); }
+
+.upload-card .card-label { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.upload-card .card-hint { font-size: 11px; color: var(--text-dim); }
+.upload-card .card-file {
+  font-size: 11px; color: var(--green);
+  margin-top: 6px;
+  display: none;
+  align-items: center; gap: 6px;
+}
+.upload-card.has-file .card-file,
+.upload-card.auto-filled .card-file { display: flex; }
+.upload-card.auto-filled .card-file { color: var(--blue); }
+.upload-card .card-file .remove {
+  color: var(--red); cursor: pointer;
+  background: none; border: none; font-size: 14px;
+  margin-left: auto;
+}
+.upload-card input[type="file"] { display: none; }
+.upload-card .auto-badge {
+  display: none;
+  position: absolute; top: 8px; right: 10px;
+  font-size: 9px; background: rgba(40,112,230,0.2);
+  color: var(--blue); padding: 2px 6px;
+  border-radius: 6px; font-weight: 600;
+}
+.upload-card.auto-filled .auto-badge { display: block; }
+
+/* ── Action buttons ── */
+.actions { display: flex; gap: 12px; margin-top: 28px; }
+.btn-primary {
+  padding: 12px 36px;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  color: #000; background: var(--green);
+  border: none; border-radius: 10px;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-primary:hover { background: #20f098; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(24,229,137,0.25); }
+.btn-primary:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-secondary {
+  padding: 12px 24px;
+  font-family: inherit; font-size: 14px; font-weight: 500;
+  color: var(--text-muted); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-secondary:hover { color: var(--text); border-color: #444; }
+
+.btn-download {
+  padding: 12px 36px;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  color: #000; background: linear-gradient(135deg, var(--green), var(--blue));
+  border: none; border-radius: 10px;
+  cursor: pointer; transition: all 0.15s;
+  display: none;
+}
+.btn-download.visible { display: inline-block; }
+.btn-download:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(24,229,137,0.25); }
+
+/* ── Progress / Log ── */
+.progress-panel {
+  margin-top: 24px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  overflow: hidden;
+  display: none;
+}
+.progress-panel.visible { display: block; }
+
+.progress-header {
+  padding: 12px 16px;
+  font-size: 13px; font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.progress-header .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--yellow);
+  animation: pulse 1.5s infinite;
+}
+.progress-header.done .dot { background: var(--green); animation: none; }
+.progress-header.error .dot { background: var(--red); animation: none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.progress-bar { height: 3px; background: var(--border); }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--blue)); width: 0%; transition: width 0.3s; }
+
+.log-area {
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  max-height: 300px;
+  overflow-y: auto;
+  font-family: 'DM Sans', monospace;
+}
+
+/* ── Step 1 special: link to React app ── */
+.step1-launch {
+  text-align: center;
+  padding: 40px;
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+  background: var(--bg-card);
+  margin-bottom: 24px;
+}
+.step1-launch .icon { font-size: 48px; margin-bottom: 16px; }
+.step1-launch h3 { font-size: 18px; margin-bottom: 8px; }
+.step1-launch p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+.step1-launch a {
+  display: inline-block;
+  padding: 12px 32px;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  color: #000; background: var(--green);
+  border-radius: 10px; text-decoration: none;
+  transition: all 0.15s;
+}
+.step1-launch a:hover { background: #20f098; transform: translateY(-1px); }
+
+.or-divider {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ── Step 5 iframe ── */
+.step5-frame {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+.step5-frame iframe {
+  width: 100%;
+  height: 700px;
+  border: none;
+}
+
+/* ── Stats cards ── */
+.stats-row { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+.stat-card {
+  padding: 14px 18px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  min-width: 120px;
+}
+.stat-card .label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.stat-card .value { font-size: 22px; font-weight: 700; color: var(--green); }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .upload-grid { grid-template-columns: 1fr; }
+  .upload-grid.cols-3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <div class="logo-mark">B</div>
+      <h1>13WCF <span>Workflow</span></h1>
+    </div>
+    <div class="badge">Treasury & FP&A</div>
+  </div>
+
+  <div class="step-nav">
+    <div class="step-item active" data-step="1" onclick="showStep(1)">
+      <div class="step-num">1</div>
+      <div class="step-info">
+        <div class="step-label">Weekly Balances</div>
+        <div class="step-sub">Rollforward balances</div>
+      </div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step-item" data-step="2" onclick="showStep(2)">
+      <div class="step-num">2</div>
+      <div class="step-info">
+        <div class="step-label">Activity Aggregator</div>
+        <div class="step-sub">Stack & match activity</div>
+      </div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step-item" data-step="3" onclick="showStep(3)">
+      <div class="step-num">3</div>
+      <div class="step-info">
+        <div class="step-label">Activity Mapper</div>
+        <div class="step-sub">Map unmapped rows</div>
+      </div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step-item" data-step="4" onclick="showStep(4)">
+      <div class="step-num">4</div>
+      <div class="step-info">
+        <div class="step-label">Activity Rollforward</div>
+        <div class="step-sub">Update rollforward file</div>
+      </div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step-item" data-step="5" onclick="showStep(5)">
+      <div class="step-num">5</div>
+      <div class="step-info">
+        <div class="step-label">13WCF Data Loader</div>
+        <div class="step-sub">Load into 13WCF model</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="reset-btn" onclick="resetWorkflow()">Reset Workflow</button>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <!-- ── STEP 1: Weekly Balances ── -->
+  <div class="step-panel active" id="panel-1">
+    <div class="panel-header">
+      <h2>Step 1: Weekly Balances Rollforward</h2>
+      <p>Process the weekly balances file using the dedicated rollforward tool. After processing, upload the output here so it's available for Step 4.</p>
+    </div>
+
+    <div class="step1-launch">
+      <div class="icon">&#x1F4CA;</div>
+      <h3>Open Weekly Balances Tool</h3>
+      <p>This opens the dedicated Weekly Balances Rollforward app in a new tab.<br>Process your 7 input files there, then come back and upload the output below.</p>
+      <a href="http://localhost:5174" target="_blank">Launch Weekly Balances App &rarr;</a>
+    </div>
+
+    <div class="or-divider">&mdash; After processing, upload the output file below &mdash;</div>
+
+    <div class="section-label">Output File</div>
+    <div class="upload-grid cols-1">
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="step1_weekly_balances_output">
+        <div class="card-label">Updated Weekly Balances</div>
+        <div class="card-hint">The output .xlsx from Weekly Balances Rollforward</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="saveStep1Output()" id="btn-step1-save" disabled>Save & Continue to Step 2 &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: Activity Aggregator Update ── -->
+  <div class="step-panel" id="panel-2">
+    <div class="panel-header">
+      <h2>Step 2: Activity Aggregator Update</h2>
+      <p>Upload the input files for the Activity Aggregator pipeline. This will stack bank statements, crypto transactions, and RCF loan data, then perform matching.</p>
+    </div>
+
+    <div class="section-label">Input Files</div>
+    <div class="upload-grid">
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s2_prev_week">
+        <div class="card-label">Previous Week's Activity Aggregator</div>
+        <div class="card-hint">.xlsx</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s2_bank_statements">
+        <div class="card-label">Find Bank Statement Lines</div>
+        <div class="card-hint">Workday .xlsx</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s2_all_transactions">
+        <div class="card-label">All Transactions</div>
+        <div class="card-hint">Lukka .csv</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <input type="file" accept=".csv" onchange="handleUpload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s2_loan_report">
+        <div class="card-label">LoanMasterReport</div>
+        <div class="card-hint">RCF .csv</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <input type="file" accept=".csv" onchange="handleUpload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s2_search_strings">
+        <div class="card-label">Search Strings</div>
+        <div class="card-hint">.xlsx</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s2_static_mapping">
+        <div class="card-label">Static Mapping</div>
+        <div class="card-hint">.xlsx</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-secondary" onclick="showStep(1)">&larr; Back</button>
+      <button class="btn-primary" onclick="runStep(2)" id="btn-run-2">Run Pipeline</button>
+      <button class="btn-download" id="btn-dl-2" onclick="downloadOutput(2)">Download Output</button>
+      <button class="btn-secondary" id="btn-next-2" onclick="showStep(3)" style="display:none">Continue to Step 3 &rarr;</button>
+    </div>
+
+    <div class="progress-panel" id="progress-2">
+      <div class="progress-header" id="progress-header-2"><div class="dot"></div><span>Processing...</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill-2"></div></div>
+      <div class="log-area" id="log-2"></div>
+    </div>
+    <div class="stats-row" id="stats-2"></div>
+  </div>
+
+  <!-- ── STEP 3: Activity Aggregator Mapper ── -->
+  <div class="step-panel" id="panel-3">
+    <div class="panel-header">
+      <h2>Step 3: Activity Aggregator Mapper</h2>
+      <p>Map unmapped rows in the Activity Aggregator using historical data from the Activity Rollforward file. The Activity Aggregator from Step 2 is automatically loaded.</p>
+    </div>
+
+    <div class="section-label">Input Files</div>
+    <div class="upload-grid">
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s3_aggregator" id="card-s3-agg">
+        <div class="card-label">Activity Aggregator</div>
+        <div class="card-hint">From Step 2 output or upload manually</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <span class="auto-badge">FROM STEP 2</span>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s3_rollforward">
+        <div class="card-label">Activity Rollforward (Previous)</div>
+        <div class="card-hint">Used for historical mapping lookups</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-secondary" onclick="showStep(2)">&larr; Back</button>
+      <button class="btn-primary" onclick="runStep(3)" id="btn-run-3">Map Activity</button>
+      <button class="btn-download" id="btn-dl-3" onclick="downloadOutput(3)">Download Output</button>
+      <button class="btn-secondary" id="btn-next-3" onclick="showStep(4)" style="display:none">Continue to Step 4 &rarr;</button>
+    </div>
+
+    <div class="progress-panel" id="progress-3">
+      <div class="progress-header" id="progress-header-3"><div class="dot"></div><span>Processing...</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill-3"></div></div>
+      <div class="log-area" id="log-3"></div>
+    </div>
+    <div class="stats-row" id="stats-3"></div>
+  </div>
+
+  <!-- ── STEP 4: Activity Rollforward ── -->
+  <div class="step-panel" id="panel-4">
+    <div class="panel-header">
+      <h2>Step 4: Activity Rollforward</h2>
+      <p>Update the Activity Rollforward file with new balances, activity data, and formulas. Files from previous steps are automatically loaded.</p>
+    </div>
+
+    <div class="section-label">Required Files</div>
+    <div class="upload-grid">
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s4_weekly_balances" id="card-s4-wb">
+        <div class="card-label">Weekly Balances (Updated)</div>
+        <div class="card-hint">From Step 1 output or upload manually</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <span class="auto-badge">FROM STEP 1</span>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s4_rollforward" id="card-s4-rf">
+        <div class="card-label">Activity Rollforward (Previous)</div>
+        <div class="card-hint">From Step 3 upload or upload here</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <span class="auto-badge">FROM STEP 3</span>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s4_aggregator" id="card-s4-agg">
+        <div class="card-label">Mapped Activity Aggregator</div>
+        <div class="card-hint">From Step 3 output or upload manually</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <span class="auto-badge">FROM STEP 3</span>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+    </div>
+
+    <div class="section-label">Optional Files</div>
+    <div class="upload-grid">
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s4_bth">
+        <div class="card-label">BTH Investments</div>
+        <div class="card-hint">Optional - Summary tab .xlsx</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s4_fva_1week">
+        <div class="card-label">1-Week 13WCF</div>
+        <div class="card-hint">Optional - FvA Data</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s4_fva_4week">
+        <div class="card-label">4-Week 13WCF</div>
+        <div class="card-hint">Optional - FvA Data</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+      <div class="upload-card" onclick="this.querySelector('input').click()" data-key="s4_fva_13week">
+        <div class="card-label">13-Week 13WCF</div>
+        <div class="card-hint">Optional - FvA Data</div>
+        <div class="card-file"><span class="fname"></span><button class="remove" onclick="event.stopPropagation();removeFile(this)">&times;</button></div>
+        <input type="file" accept=".xlsx,.xls" onchange="handleUpload(this)">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-secondary" onclick="showStep(3)">&larr; Back</button>
+      <button class="btn-primary" onclick="runStep(4)" id="btn-run-4">Process Rollforward</button>
+      <button class="btn-download" id="btn-dl-4" onclick="downloadOutput(4)">Download Output</button>
+      <button class="btn-secondary" id="btn-next-4" onclick="showStep(5)" style="display:none">Continue to Step 5 &rarr;</button>
+    </div>
+
+    <div class="progress-panel" id="progress-4">
+      <div class="progress-header" id="progress-header-4"><div class="dot"></div><span>Processing...</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill-4"></div></div>
+      <div class="log-area" id="log-4"></div>
+    </div>
+    <div class="stats-row" id="stats-4"></div>
+  </div>
+
+  <!-- ── STEP 5: 13WCF Data Loader ── -->
+  <div class="step-panel" id="panel-5">
+    <div class="panel-header">
+      <h2>Step 5: 13WCF Data Loader</h2>
+      <p>Load settlement, supplier invoice, and customer invoice data into the 13WCF model. This processes entirely in your browser.</p>
+    </div>
+
+    <div class="step5-frame" id="step5-container">
+      <iframe id="step5-iframe" sandbox="allow-scripts allow-same-origin allow-downloads"></iframe>
+    </div>
+
+    <div class="actions" style="margin-top: 16px;">
+      <button class="btn-secondary" onclick="showStep(4)">&larr; Back</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let currentStep = 1;
+const fileRegistry = {};   // key -> File object (for display)
+const serverFiles = {};    // key -> filename on server
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-item').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + n).classList.add('active');
+  document.querySelector(`.step-item[data-step="${n}"]`).classList.add('active');
+
+  // Auto-populate Step 3's aggregator from Step 2 output
+  if (n === 3) autoFillFromPrevious();
+  if (n === 4) autoFillStep4();
+  // Load Step 5 iframe
+  if (n === 5) loadStep5();
+}
+
+function autoFillFromPrevious() {
+  // If Step 2 is done, show auto-fill on the aggregator card
+  const card = document.getElementById('card-s3-agg');
+  if (serverFiles['step2_activity_aggregator_output'] && card) {
+    card.classList.add('auto-filled');
+    card.querySelector('.fname').textContent = serverFiles['step2_activity_aggregator_output'];
+  }
+}
+
+function autoFillStep4() {
+  // Weekly Balances from Step 1
+  const wbCard = document.getElementById('card-s4-wb');
+  if (serverFiles['step1_weekly_balances_output'] && wbCard) {
+    wbCard.classList.add('auto-filled');
+    wbCard.querySelector('.fname').textContent = serverFiles['step1_weekly_balances_output'];
+  }
+  // Rollforward from Step 3 upload
+  const rfCard = document.getElementById('card-s4-rf');
+  if (serverFiles['s3_rollforward'] && rfCard) {
+    rfCard.classList.add('auto-filled');
+    rfCard.querySelector('.fname').textContent = serverFiles['s3_rollforward'];
+  }
+  // Mapped Aggregator from Step 3 output
+  const aggCard = document.getElementById('card-s4-agg');
+  if (serverFiles['step3_mapped_aggregator_output'] && aggCard) {
+    aggCard.classList.add('auto-filled');
+    aggCard.querySelector('.fname').textContent = serverFiles['step3_mapped_aggregator_output'];
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// FILE UPLOAD
+// ═══════════════════════════════════════════════════════
+function handleUpload(input) {
+  const card = input.closest('.upload-card');
+  const key = card.dataset.key;
+  const file = input.files[0];
+  if (!file) return;
+
+  card.classList.add('has-file');
+  card.classList.remove('auto-filled');
+  card.querySelector('.fname').textContent = file.name;
+  fileRegistry[key] = file;
+
+  // Upload to server
+  const fd = new FormData();
+  fd.append(key, file);
+  fetch('/api/upload', { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+      if (data.saved && data.saved[key]) {
+        serverFiles[key] = data.saved[key];
+      }
+    });
+
+  // Enable Step 1 save button
+  if (key === 'step1_weekly_balances_output') {
+    document.getElementById('btn-step1-save').disabled = false;
+  }
+}
+
+function removeFile(btn) {
+  const card = btn.closest('.upload-card');
+  const key = card.dataset.key;
+  card.classList.remove('has-file', 'auto-filled');
+  card.querySelector('input[type="file"]').value = '';
+  card.querySelector('.fname').textContent = '';
+  delete fileRegistry[key];
+  delete serverFiles[key];
+}
+
+// ═══════════════════════════════════════════════════════
+// STEP 1: Save output and continue
+// ═══════════════════════════════════════════════════════
+function saveStep1Output() {
+  const file = fileRegistry['step1_weekly_balances_output'];
+  if (!file) return;
+
+  const fd = new FormData();
+  fd.append('file', file);
+  fetch('/api/save-output/1', { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+      serverFiles['step1_weekly_balances_output'] = data.saved;
+      setStepStatus(1, 'done');
+      showStep(2);
+    });
+}
+
+// ═══════════════════════════════════════════════════════
+// STEPS 2-4: Run processing
+// ═══════════════════════════════════════════════════════
+function runStep(step) {
+  const btn = document.getElementById('btn-run-' + step);
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  const panel = document.getElementById('progress-' + step);
+  panel.classList.add('visible');
+  document.getElementById('log-' + step).innerHTML = '';
+  document.getElementById('progress-header-' + step).className = 'progress-header';
+  document.getElementById('progress-header-' + step).querySelector('span').textContent = 'Processing...';
+  document.getElementById('progress-fill-' + step).style.width = '0%';
+  document.getElementById('stats-' + step).innerHTML = '';
+
+  setStepStatus(step, 'running');
+
+  fetch('/api/run/' + step, { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        addLog(step, 'ERROR: ' + data.error);
+        setStepStatus(step, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Retry';
+        return;
+      }
+      // Start SSE progress
+      listenProgress(step);
+    })
+    .catch(err => {
+      addLog(step, 'ERROR: ' + err.message);
+      setStepStatus(step, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Retry';
+    });
+}
+
+function listenProgress(step) {
+  const es = new EventSource('/api/progress/' + step);
+  const logEl = document.getElementById('log-' + step);
+
+  let stageCount = 0;
+
+  es.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+
+    if (msg.type === 'log') {
+      addLog(step, msg.message);
+    }
+    else if (msg.type === 'stages') {
+      stageCount = Object.keys(msg.stages).length;
+      const done = Object.values(msg.stages).filter(s => s === 'ok').length;
+      const pct = stageCount > 0 ? Math.round((done / stageCount) * 100) : 0;
+      document.getElementById('progress-fill-' + step).style.width = pct + '%';
+    }
+    else if (msg.type === 'progress') {
+      document.getElementById('progress-fill-' + step).style.width = msg.percent + '%';
+    }
+    else if (msg.type === 'done') {
+      es.close();
+      document.getElementById('progress-fill-' + step).style.width = '100%';
+      document.getElementById('progress-header-' + step).className = 'progress-header done';
+      document.getElementById('progress-header-' + step).querySelector('span').textContent = 'Complete';
+      document.getElementById('btn-dl-' + step).classList.add('visible');
+      document.getElementById('btn-next-' + step).style.display = '';
+      setStepStatus(step, 'done');
+
+      // Refresh server file registry
+      fetch('/api/status').then(r => r.json()).then(data => {
+        Object.assign(serverFiles, data.files);
+      });
+
+      const btn = document.getElementById('btn-run-' + step);
+      btn.disabled = false;
+      btn.textContent = 'Re-run';
+
+      if (msg.stats) {
+        showStats(step, msg.stats);
+      }
+    }
+    else if (msg.type === 'error') {
+      es.close();
+      document.getElementById('progress-header-' + step).className = 'progress-header error';
+      document.getElementById('progress-header-' + step).querySelector('span').textContent = 'Error';
+      setStepStatus(step, 'error');
+
+      const btn = document.getElementById('btn-run-' + step);
+      btn.disabled = false;
+      btn.textContent = 'Retry';
+    }
+  };
+
+  es.onerror = () => {
+    es.close();
+  };
+}
+
+function addLog(step, msg) {
+  const logEl = document.getElementById('log-' + step);
+  const div = document.createElement('div');
+  div.textContent = msg;
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function showStats(step, stats) {
+  const el = document.getElementById('stats-' + step);
+  el.innerHTML = '';
+  for (const [key, val] of Object.entries(stats)) {
+    const card = document.createElement('div');
+    card.className = 'stat-card';
+    card.innerHTML = `<div class="label">${key.replace(/_/g, ' ')}</div><div class="value">${typeof val === 'number' ? val.toLocaleString() : val}</div>`;
+    el.appendChild(card);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// DOWNLOAD
+// ═══════════════════════════════════════════════════════
+function downloadOutput(step) {
+  window.location.href = '/api/download/' + step;
+}
+
+// ═══════════════════════════════════════════════════════
+// SIDEBAR STATUS
+// ═══════════════════════════════════════════════════════
+function setStepStatus(step, status) {
+  const item = document.querySelector(`.step-item[data-step="${step}"]`);
+  item.classList.remove('done', 'error', 'running');
+  if (status === 'done') {
+    item.classList.add('done');
+    item.querySelector('.step-sub').textContent = 'Complete';
+    item.querySelector('.step-num').innerHTML = '&#10003;';
+  } else if (status === 'error') {
+    item.classList.add('error');
+    item.querySelector('.step-sub').textContent = 'Error';
+  } else if (status === 'running') {
+    item.classList.add('running');
+    item.querySelector('.step-sub').textContent = 'Running...';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// STEP 5: Load Data Loader in iframe
+// ═══════════════════════════════════════════════════════
+let step5Loaded = false;
+function loadStep5() {
+  if (step5Loaded) return;
+  step5Loaded = true;
+  fetch('/api/data-loader-html')
+    .then(r => r.text())
+    .then(html => {
+      const iframe = document.getElementById('step5-iframe');
+      iframe.srcdoc = html;
+    });
+}
+
+// ═══════════════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════════════
+function resetWorkflow() {
+  if (!confirm('Reset all workflow progress? This will clear all uploaded files and outputs.')) return;
+  fetch('/api/reset', { method: 'POST' })
+    .then(() => location.reload());
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT: Restore state from server
+// ═══════════════════════════════════════════════════════
+fetch('/api/status').then(r => r.json()).then(data => {
+  Object.assign(serverFiles, data.files || {});
+  for (const [step, status] of Object.entries(data.step_status || {})) {
+    if (status !== 'pending') {
+      setStepStatus(step, status);
+    }
+  }
+});
+</script>
+</body>
+</html>
