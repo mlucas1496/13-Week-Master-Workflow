@@ -11,8 +11,9 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  --green: #18E589;
-  --blue: #2870E6;
+  --green: #23D389;
+  --blue: #2870F0;
+  --cyan: #90FCFF;
   --purple: #A456EA;
   --yellow: #FDBD5B;
   --red: #D04E59;
@@ -21,7 +22,7 @@
   --bg-hover: #1C1C1C;
   --border: #2A2A2A;
   --text: #FFFFFF;
-  --text-muted: #9E9E9E;
+  --text-muted: #CBD0DB;
   --text-dim: #6B6B6B;
   --surface: #1A1A1A;
 }
@@ -61,12 +62,10 @@ body {
   gap: 12px;
   margin-bottom: 8px;
 }
-.sidebar-header .logo-mark {
-  width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--green), var(--blue));
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 18px; color: #000;
+.sidebar-header .bullish-logo {
+  height: 22px;
+  width: auto;
+  opacity: 0.95;
 }
 .sidebar-header h1 { font-size: 18px; font-weight: 600; }
 .sidebar-header h1 span { color: var(--green); }
@@ -91,7 +90,7 @@ body {
   border: 1px solid transparent;
 }
 .step-item:hover { background: var(--bg-hover); }
-.step-item.active { background: rgba(24,229,137,0.06); border-color: var(--green); }
+.step-item.active { background: rgba(35,211,137,0.06); border-color: var(--green); }
 .step-item.done .step-num { background: var(--green); color: #000; }
 .step-item.error .step-num { background: var(--red); }
 .step-item.running .step-num { background: var(--yellow); color: #000; animation: pulse 1.5s infinite; }
@@ -177,8 +176,8 @@ body {
   position: relative;
 }
 .upload-card:hover { background: var(--bg-hover); border-color: #444; }
-.upload-card.has-file { border-style: solid; border-color: var(--green); background: rgba(24,229,137,0.04); }
-.upload-card.auto-filled { border-color: var(--blue); background: rgba(40,112,230,0.04); }
+.upload-card.has-file { border-style: solid; border-color: var(--green); background: rgba(35,211,137,0.04); }
+.upload-card.auto-filled { border-color: var(--blue); background: rgba(40,112,240,0.04); }
 
 .upload-card .card-label { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
 .upload-card .card-hint { font-size: 11px; color: var(--text-dim); }
@@ -200,7 +199,7 @@ body {
 .upload-card .auto-badge {
   display: none;
   position: absolute; top: 8px; right: 10px;
-  font-size: 9px; background: rgba(40,112,230,0.2);
+  font-size: 9px; background: rgba(40,112,240,0.2);
   color: var(--blue); padding: 2px 6px;
   border-radius: 6px; font-weight: 600;
 }
@@ -215,7 +214,7 @@ body {
   border: none; border-radius: 10px;
   cursor: pointer; transition: all 0.15s;
 }
-.btn-primary:hover { background: #20f098; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(24,229,137,0.25); }
+.btn-primary:hover { background: #2ee09a; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(35,211,137,0.25); }
 .btn-primary:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; transform: none; box-shadow: none; }
 
 .btn-secondary {
@@ -236,7 +235,7 @@ body {
   display: none;
 }
 .btn-download.visible { display: inline-block; }
-.btn-download:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(24,229,137,0.25); }
+.btn-download:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(35,211,137,0.25); }
 
 /* ── Progress / Log ── */
 .progress-panel {
@@ -335,9 +334,9 @@ body {
 <div class="sidebar">
   <div class="sidebar-header">
     <div class="logo">
-      <div class="logo-mark">B</div>
-      <h1>13WCF <span>Workflow</span></h1>
+      <img src="/static/bullish-logo-white.png" alt="Bullish" class="bullish-logo">
     </div>
+    <h1>13WCF <span>Workflow</span></h1>
     <div class="badge">Treasury & FP&A</div>
   </div>
 
@@ -946,21 +945,58 @@ async function extractCellStyleMaps(origBuf) {
 
 /* ─── Patch output XLSX ─── */
 async function patchXlsxOutput(origBuf, outBuf, cellStyleMaps) {
-  const origParsed = parseZipEntries(origBuf);
-  const outParsed  = parseZipEntries(outBuf);
-  const replacements = {};
-  for (const e of origParsed.entries) {
-    if (e.name === "xl/styles.xml" || e.name === "xl/theme/theme1.xml") {
-      const raw = await zipReadFile(e, origParsed.u8, origParsed.dv);
-      replacements[e.name] = raw;
+  /* Use JSZip for a clean rebuild — lets us add/remove/replace files easily */
+  const origZip = await JSZip.loadAsync(origBuf);
+  const outZip  = await JSZip.loadAsync(outBuf);
+  const finalZip = new JSZip();
+
+  /* Start with everything from the SheetJS output */
+  for (const [name, entry] of Object.entries(outZip.files)) {
+    if (entry.dir) continue;
+    finalZip.file(name, await entry.async("uint8array"));
+  }
+
+  /* ── Restore files from original that SheetJS dropped ── */
+  const restoreFromOrig = [
+    "xl/styles.xml",
+    "xl/theme/theme1.xml",
+    "xl/sharedStrings.xml",
+    "xl/calcChain.xml",
+  ];
+  for (const name of restoreFromOrig) {
+    if (origZip.files[name]) {
+      finalZip.file(name, await origZip.files[name].async("uint8array"));
     }
   }
-  for (const e of outParsed.entries) {
-    if (!e.name.startsWith("xl/worksheets/sheet") || !e.name.endsWith(".xml")) continue;
-    const raw = await zipReadFile(e, outParsed.u8, outParsed.dv);
+  /* Restore external links (formulas reference [1]Sheet!Cell) */
+  for (const [name, entry] of Object.entries(origZip.files)) {
+    if (entry.dir) continue;
+    if (name.startsWith("xl/externalLinks/") || name.startsWith("customXml/")) {
+      finalZip.file(name, await entry.async("uint8array"));
+    }
+  }
+
+  /* ── Restore workbook.xml and its rels from original ── */
+  /* (has calcPr, external link references, correct structure) */
+  if (origZip.files["xl/workbook.xml"]) {
+    finalZip.file("xl/workbook.xml", await origZip.files["xl/workbook.xml"].async("uint8array"));
+  }
+  if (origZip.files["xl/_rels/workbook.xml.rels"]) {
+    finalZip.file("xl/_rels/workbook.xml.rels", await origZip.files["xl/_rels/workbook.xml.rels"].async("uint8array"));
+  }
+
+  /* ── Restore [Content_Types].xml from original ── */
+  if (origZip.files["[Content_Types].xml"]) {
+    finalZip.file("[Content_Types].xml", await origZip.files["[Content_Types].xml"].async("uint8array"));
+  }
+
+  /* ── Patch worksheet XMLs: restore cell styles + fix _xlfn.MAXIFS ── */
+  for (const [name, entry] of Object.entries(outZip.files)) {
+    if (!name.startsWith("xl/worksheets/sheet") || !name.endsWith(".xml")) continue;
+    const raw = await entry.async("uint8array");
     let xml = _td.decode(raw);
     let changed = false;
-    const origMap = cellStyleMaps[e.name];
+    const origMap = cellStyleMaps[name];
     if (origMap && Object.keys(origMap).length > 0) {
       xml = xml.replace(/<c\s+r="([A-Z]+[0-9]+)"([^>]*?)(\/?>)/g, (match, addr, rest, close) => {
         const origS = origMap[addr];
@@ -974,9 +1010,15 @@ async function patchXlsxOutput(origBuf, outBuf, cellStyleMaps) {
       xml = xml.replace(/(?<!_xlfn\.)MAXIFS\(/g, "_xlfn.MAXIFS(");
       changed = true;
     }
-    if (changed) replacements[e.name] = _te.encode(xml);
+    if (changed) finalZip.file(name, _te.encode(xml));
   }
-  return await rebuildZip(outParsed, replacements);
+
+  /* ── Remove orphaned metadata.xml if not in original ── */
+  if (!origZip.files["xl/metadata.xml"] && finalZip.files["xl/metadata.xml"]) {
+    finalZip.remove("xl/metadata.xml");
+  }
+
+  return await finalZip.generateAsync({ type: "uint8array", compression: "DEFLATE" });
 }
 
 /* ─── SheetJS cell helpers ─── */
@@ -1029,20 +1071,62 @@ function s1fixAtFormulas(wb) {
 }
 
 /* ─── Step 1 sub-step: Roll Forward ─── */
-function s1_step1_rollForward(wb, log) {
+
+/*
+ * K→J copy: paste ALL column K values into column J.
+ * Values come from the server (xlwings opens file in Excel to get
+ * the real computed values — no stale caches).
+ * Simple paste — no rules, no heuristics.
+ */
+function s1_rollKtoJ(ws, log, sheetLabel, serverKValues) {
+  const end = s1endRC(ws);
+  let pasted = 0, skipped = 0;
+
+  for (let r = 7; r <= end.r; r++) {
+    const excelRow = r + 1;                       // 0-indexed → 1-indexed
+    const jAddr = s1addr(r, 9);                   // column J
+
+    if (serverKValues && serverKValues[String(excelRow)] !== undefined) {
+      ws[jAddr] = { t: "n", v: serverKValues[String(excelRow)] };
+      pasted++;
+    } else {
+      skipped++;
+    }
+  }
+
+  log(sheetLabel + ": pasted " + pasted + " K→J values" +
+      (skipped > 0 ? ", " + skipped + " rows skipped (K empty/text)" : ""));
+}
+
+function s1_step1_rollForward(wb, log, serverKData) {
   const getSheet = (n) => { if (!wb.Sheets[n]) throw new Error("Sheet missing: "+n); return wb.Sheets[n]; };
+
+  /* ── FIRST: copy K→J using server-provided computed values ── */
+  s1_rollKtoJ(getSheet("USDx Balances"), log, "USDx Balances",
+              serverKData ? serverKData["USDx Balances"] : null);
+  s1_rollKtoJ(getSheet("Ref Acct Balances Full Summary"), log, "Ref Acct Balances",
+              serverKData ? serverKData["Ref Acct Balances Full Summary"] : null);
+
+  /* ── THEN: advance the Cover Page date by 7 days ── */
   const wCover = getSheet("Cover Page");
   const b6 = s1getCell(wCover, 5, 1);
-  if (!b6 || typeof b6.v !== "number") throw new Error("Cover Page B6 is not a numeric date serial");
-  const oldSerial = b6.v, newSerial = oldSerial + 7;
+  if (!b6) throw new Error("Cover Page B6 is empty");
+  let oldSerial;
+  if (typeof b6.v === "number") {
+    oldSerial = b6.v;
+  } else if (b6.v instanceof Date) {
+    oldSerial = s1dateToSerial(b6.v);
+  } else if (typeof b6.v === "string") {
+    const parsed = Date.parse(b6.v);
+    if (isNaN(parsed)) throw new Error("Cover Page B6 is not a recognizable date: " + b6.v);
+    oldSerial = s1dateToSerial(new Date(parsed));
+  } else {
+    throw new Error("Cover Page B6 has unexpected type: " + typeof b6.v + " (" + b6.v + ")");
+  }
+  const newSerial = oldSerial + 7;
   wCover[s1addr(5, 1)] = { ...b6, v: newSerial };
   log("Cover Page B6: " + s1fmtDate(oldSerial) + " -> " + s1fmtDate(newSerial));
-  const wUSD = getSheet("USDx Balances"); const uEnd = s1endRC(wUSD); let uRollCount = 0;
-  for (let r = 7; r <= uEnd.r; r++) { if (s1isForm(wUSD, r, 9)) continue; const kC = s1getCell(wUSD, r, 10); if (!kC) continue; if (kC.v != null && typeof kC.v === "number") { s1putNum(wUSD, r, 9, kC.v); uRollCount++; } }
-  log("USDx Balances: rolled " + uRollCount + " K->J values");
-  const wRef = getSheet("Ref Acct Balances Full Summary"); const rEnd = s1endRC(wRef); let rRollCount = 0;
-  for (let r = 7; r <= rEnd.r; r++) { if (s1isForm(wRef, r, 9)) continue; const kC = s1getCell(wRef, r, 10); if (!kC) continue; if (kC.v != null && typeof kC.v === "number") { s1putNum(wRef, r, 9, kC.v); rRollCount++; } }
-  log("Ref Acct Balances: rolled " + rRollCount + " K->J values");
+
   return { oldSerial, newSerial };
 }
 
@@ -1315,13 +1399,27 @@ async function s1_step6_fx(wb, newSerial, log, anthropicKey) {
 
 /* ─── Step 1 Main Orchestrator ─── */
 async function s1_run(files, setStepSt, log, anthropicKey) {
+  /* ── Extract column K values server-side using openpyxl (data_only=True) ── */
+  log("Extracting column K values via server (openpyxl data_only=True)...");
+  const kBlob = new Blob([new Uint8Array(files.s1_main)], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  });
+  const kFD = new FormData();
+  kFD.append("file", kBlob, "weekly_balances.xlsx");
+  const kResp = await fetch("/api/extract-k-values", { method: "POST", body: kFD });
+  if (!kResp.ok) throw new Error("Server K-value extraction failed: " + (await kResp.text()));
+  const serverKData = await kResp.json();
+  if (serverKData.error) throw new Error("Server K-value error: " + serverKData.error);
+  const totalK = Object.values(serverKData).reduce((a, sh) => a + Object.keys(sh).length, 0);
+  log("Server extracted " + totalK + " column K values across " + Object.keys(serverKData).length + " sheets");
+
   log("Extracting formatting from original file...");
   const cellStyleMaps = await extractCellStyleMaps(files.s1_main);
   const styleCount = Object.values(cellStyleMaps).reduce((a, m) => a + Object.keys(m).length, 0);
   log("Preserved " + styleCount + " cell styles across " + Object.keys(cellStyleMaps).length + " sheets");
   const wb = XLSX.read(files.s1_main, { type: "array", cellFormula: true, cellStyles: true, bookVBA: true, cellNF: true, sheetStubs: true });
   log("Loaded workbook: " + wb.SheetNames.length + " sheets");
-  setStepSt(1, "run"); const { newSerial } = s1_step1_rollForward(wb, log); setStepSt(1, "ok");
+  setStepSt(1, "run"); const { newSerial } = s1_step1_rollForward(wb, log, serverKData); setStepSt(1, "ok");
   setStepSt(6, "run"); await s1_step6_fx(wb, newSerial, log, anthropicKey); setStepSt(6, "ok");
   setStepSt(2, "run"); s1_step2_bankStatements(wb, files, newSerial, log); setStepSt(2, "ok");
   setStepSt(3, "run"); s1_step3_snapshot(wb, files, newSerial, log); setStepSt(3, "ok");
@@ -1552,6 +1650,8 @@ function loadStep5() {
   fetch('/api/data-loader-html')
     .then(r => r.text())
     .then(html => {
+      // Hide the data loader's own header when embedded in the unified workflow
+      html = html.replace('</head>', '<style>.header{display:none!important}</style></head>');
       const iframe = document.getElementById('step5-iframe');
       iframe.srcdoc = html;
     });

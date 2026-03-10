@@ -2,7 +2,6 @@
 
 # 13WCF Unified Workflow Launcher
 # ================================
-# Starts the Weekly Balances Vite server (Step 1) and the unified Flask app.
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -20,24 +19,9 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-# Create virtual environment if needed
-if [ ! -d "$APP_DIR/venv" ]; then
-    echo "Creating virtual environment..."
-    python3 -m venv "$APP_DIR/venv"
-fi
-
-# Activate venv
-source "$APP_DIR/venv/bin/activate"
-
 # Install dependencies
 echo "Installing Python dependencies..."
-pip install -q --upgrade pip
-pip install -q -r "$APP_DIR/requirements.txt"
-
-# Also install deps for sub-apps (Activity Aggregator Update)
-if [ -f "$HOME/Documents/Activity Aggregator Update/app/requirements.txt" ]; then
-    pip install -q -r "$HOME/Documents/Activity Aggregator Update/app/requirements.txt"
-fi
+python3 -m pip install -q -r "$APP_DIR/requirements.txt"
 
 # Create required directories
 mkdir -p "$APP_DIR/uploads" "$APP_DIR/outputs"
@@ -57,7 +41,6 @@ echo ""
 cleanup() {
     echo ""
     echo "Shutting down..."
-    deactivate 2>/dev/null
     exit 0
 }
 trap cleanup INT TERM

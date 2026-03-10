@@ -515,6 +515,344 @@ def download_output(step):
 
 
 # ---------------------------------------------------------------------------
+# Step 1: Extract column K values server-side (openpyxl data_only=True)
+# ---------------------------------------------------------------------------
+
+@app.route("/api/extract-k-values", methods=["POST"])
+def extract_k_values():
+    """
+    Read column K values from the Weekly Balances file by evaluating
+    formulas from the raw data sheets (cached values are often stale).
+
+    Formula chain:
+      K (USDx Balances) → SUMIF across 5 summary sheets col I
+        Workday      → SUMIFS on 'Find Bank Statements' (E=date, M=ref, O=bal)
+        Lukka        → SUMIFS on 'Daily Snapshot Balance Reconcil' (T=ref, G=bal)
+        CCC/CCD      → SUMIFS on 'CCC and CCD Summary' (C=ref, H=bal)
+        Bullish      → 'Spot Balance Summary' → EoD Balances (L=H+I+J)
+        Balances     → direct values
+
+    Returns JSON:  {"USDx Balances": {"8": 546276258.54, ...}, ...}
+    """
+    import openpyxl as _openpyxl
+    from datetime import datetime as _dt, timedelta as _td
+    import re as _re
+
+    f = request.files.get("file")
+    if not f:
+        return jsonify({"error": "No file provided"}), 400
+
+    fname = secure_filename(f.filename)
+    temp_path = os.path.join(UPLOAD_DIR, f"temp_k_{uuid.uuid4().hex[:8]}_{fname}")
+    f.save(temp_path)
+
+    try:
+        wb_data = _openpyxl.load_workbook(temp_path, data_only=True)
+        wb_form = _openpyxl.load_workbook(temp_path, data_only=False)
+
+        # ----------------------------------------------------------
+        # Helper: previous business day (skip weekends)
+        # ----------------------------------------------------------
+        def _prev_bday(d):
+            d = d - _td(days=1)
+            while d.weekday() >= 5:
+                d = d - _td(days=1)
+            return d
+
+        def _to_date(v):
+            if isinstance(v, _dt):
+                return v.date() if hasattr(v, "date") else v
+            return None
+
+        def _to_float(v):
+            if isinstance(v, (int, float)):
+                return float(v)
+            if isinstance(v, str):
+                try:
+                    return float(v.strip())
+                except (ValueError, TypeError):
+                    pass
+            return None
+
+        # ----------------------------------------------------------
+        # Cover Page date
+        # ----------------------------------------------------------
+        cover_date_raw = None
+        if "Cover Page" in wb_data.sheetnames:
+            cover_date_raw = wb_data["Cover Page"].cell(6, 2).value
+        cover_dt = _to_date(cover_date_raw)  # date object
+        prev_bd = _prev_bday(cover_dt) if cover_dt else None
+
+        # ----------------------------------------------------------
+        # 1) Workday: read 'Find Bank Statements' raw data
+        #    Formula: SUMIFS(O, E=date, M=ref) with MAXIFS date logic
+        # ----------------------------------------------------------
+        workday_balances = {}  # {ref_float: balance}
+        if ("Find Bank Statements" in wb_data.sheetnames
+                and "Workday Accts Summary" in wb_data.sheetnames
+                and cover_dt):
+            ws_fbs = wb_data["Find Bank Statements"]
+            # Build {(date, ref_str): sum_O} and {ref_str: max_date}
+            fbs_lookup = {}
+            fbs_max_date = {}
+            for r in range(8, ws_fbs.max_row + 1):
+                e_val = ws_fbs.cell(r, 5).value   # E = Statement Date
+                m_val = ws_fbs.cell(r, 13).value   # M = Ref number
+                o_val = ws_fbs.cell(r, 15).value   # O = Balance
+                if m_val is None:
+                    continue
+                dt = _to_date(e_val)
+                if dt is None:
+                    continue
+                ref_str = str(int(float(m_val))) if isinstance(m_val, (int, float)) else str(m_val).strip()
+                bal = float(o_val) if isinstance(o_val, (int, float)) else 0.0
+                key = (dt, ref_str)
+                fbs_lookup[key] = fbs_lookup.get(key, 0.0) + bal
+                if ref_str not in fbs_max_date or dt > fbs_max_date[ref_str]:
+                    fbs_max_date[ref_str] = dt
+
+            ws_wd = wb_data["Workday Accts Summary"]
+            for r in range(9, ws_wd.max_row + 1):
+                b = ws_wd.cell(r, 2).value
+                rf = _to_float(b)
+                if rf is None:
+                    continue
+                ref_str = str(int(rf))
+                max_dt = fbs_max_date.get(ref_str)
+                if max_dt == cover_dt:
+                    bal = fbs_lookup.get((cover_dt, ref_str), 0.0)
+                else:
+                    bal = fbs_lookup.get((prev_bd, ref_str), 0.0)
+                workday_balances[rf] = bal
+
+        # ----------------------------------------------------------
+        # 2) Lukka: read 'Daily Snapshot Balance Reconcil'
+        #    Formula: SUMIFS(G, T=ref)
+        # ----------------------------------------------------------
+        lukka_balances = {}  # {ref_float: balance}
+        if "Daily Snapshot Balance Reconcil" in wb_data.sheetnames:
+            ws_ds = wb_data["Daily Snapshot Balance Reconcil"]
+            for r in range(9, ws_ds.max_row + 1):
+                t_val = ws_ds.cell(r, 20).value  # T = ref
+                g_val = ws_ds.cell(r, 7).value   # G = balance
+                if t_val is None or g_val is None:
+                    continue
+                rf = _to_float(t_val)
+                bal = _to_float(g_val)
+                if rf is None or bal is None:
+                    continue
+                lukka_balances[rf] = lukka_balances.get(rf, 0.0) + bal
+
+        # ----------------------------------------------------------
+        # 3) CCC/CCD: read 'CCC and CCD Summary'
+        #    Formula: SUMIFS(H, C=ref)
+        # ----------------------------------------------------------
+        ccc_balances = {}  # {ref_float: balance}
+        if "CCC and CCD Summary" in wb_data.sheetnames:
+            ws_ccc = wb_data["CCC and CCD Summary"]
+            for r in range(1, ws_ccc.max_row + 1):
+                c_val = ws_ccc.cell(r, 3).value  # C = ref
+                h_val = ws_ccc.cell(r, 8).value  # H = balance
+                if c_val is None or h_val is None:
+                    continue
+                rf = _to_float(c_val)
+                bal = _to_float(h_val)
+                if rf is None or bal is None:
+                    continue
+                ccc_balances[rf] = ccc_balances.get(rf, 0.0) + bal
+
+        # ----------------------------------------------------------
+        # 4) Bullish Exchange: EoD Balances → Spot Balance Summary
+        #    EoD col L = SUM(H:J) — cached L values are stale, compute
+        #    Spot Balance: SUMIFS(computed_L, C=symbol, B=cover_date+2)
+        #    Bullish row 9 (ref 59) = Spot Balance Summary C21
+        #    Bullish row 10 (ref 60) = hardcoded value
+        # ----------------------------------------------------------
+        bullish_balances = {}  # {ref_float: balance}
+        if ("EoD Balances on Exchange" in wb_data.sheetnames
+                and "Spot Balance Summary" in wb_data.sheetnames
+                and "Bullish Exchange Accts Summary" in wb_data.sheetnames
+                and cover_dt):
+            ws_eod = wb_data["EoD Balances on Exchange"]
+            target_eod_date = _dt(cover_dt.year, cover_dt.month, cover_dt.day) + _td(days=2)
+
+            # Compute L = H+I+J per row, group by (date, symbol)
+            eod_by_sym = {}  # {(date, symbol): sum_of_computed_L}
+            for r in range(9, ws_eod.max_row + 1):
+                d = ws_eod.cell(r, 2).value
+                c = ws_eod.cell(r, 3).value
+                h = _to_float(ws_eod.cell(r, 8).value) or 0.0
+                i = _to_float(ws_eod.cell(r, 9).value) or 0.0
+                j = _to_float(ws_eod.cell(r, 10).value) or 0.0
+                if d is None or c is None:
+                    continue
+                computed_l = h + i + j
+                key = (d, c)
+                eod_by_sym[key] = eod_by_sym.get(key, 0.0) + computed_l
+
+            # Read Spot Balance Summary B10:B20 for symbol criteria
+            ws_sbs = wb_data["Spot Balance Summary"]
+            spot_total = 0.0
+            for r in range(10, 21):
+                sym = ws_sbs.cell(r, 2).value
+                if sym:
+                    spot_total += eod_by_sym.get((target_eod_date, sym), 0.0)
+
+            # Read Bullish Exchange Accts Summary
+            ws_be = wb_data["Bullish Exchange Accts Summary"]
+            ws_be_f = wb_form["Bullish Exchange Accts Summary"]
+            for r in range(9, ws_be.max_row + 1):
+                b = ws_be.cell(r, 2).value
+                rf = _to_float(b)
+                if rf is None:
+                    continue
+                i_f = ws_be_f.cell(r, 9).value
+                i_d = ws_be.cell(r, 9).value
+                if isinstance(i_f, str) and "Spot Balance Summary" in i_f:
+                    # This row references Spot Balance Summary C21
+                    bullish_balances[rf] = spot_total
+                elif isinstance(i_d, (int, float)):
+                    bullish_balances[rf] = float(i_d)
+
+        # ----------------------------------------------------------
+        # 5) Balances to Confirm Weekly: direct values
+        # ----------------------------------------------------------
+        btc_balances = {}  # {ref_float: balance}
+        if "Balances to Confirm Weekly" in wb_data.sheetnames:
+            ws_btc = wb_data["Balances to Confirm Weekly"]
+            for r in range(1, ws_btc.max_row + 1):
+                b = ws_btc.cell(r, 2).value
+                i = ws_btc.cell(r, 9).value
+                rf = _to_float(b)
+                bal = _to_float(i)
+                if rf is not None and bal is not None:
+                    btc_balances[rf] = btc_balances.get(rf, 0.0) + bal
+
+        # ----------------------------------------------------------
+        # Merge all summary balances into unified lookup
+        # ----------------------------------------------------------
+        sumif_lookup = {}
+        for d in [workday_balances, lukka_balances, ccc_balances,
+                   bullish_balances, btc_balances]:
+            for ref, bal in d.items():
+                sumif_lookup[ref] = sumif_lookup.get(ref, 0.0) + bal
+
+        # ----------------------------------------------------------
+        # Process each target sheet (USDx Balances, etc.)
+        # ----------------------------------------------------------
+        result = {}
+        for sheet_name in ["USDx Balances", "Ref Acct Balances Full Summary"]:
+            if sheet_name not in wb_data.sheetnames:
+                continue
+
+            ws_d = wb_data[sheet_name]
+            ws_f = wb_form[sheet_name]
+            k_values = {}
+
+            # First pass: compute data-row K values
+            for row in range(1, min(ws_d.max_row + 1, 2000)):
+                k_cached = ws_d.cell(row, 11).value
+                k_formula = ws_f.cell(row, 11).value
+                j_cached = ws_d.cell(row, 10).value
+                b_val = ws_d.cell(row, 2).value
+                is_formula = isinstance(k_formula, str) and k_formula.startswith("=")
+
+                if isinstance(k_cached, (int, float)) and not is_formula:
+                    k_values[str(row)] = float(k_cached)
+                    continue
+
+                if isinstance(k_cached, _dt) and not is_formula:
+                    delta = k_cached - _dt(1899, 12, 30)
+                    k_values[str(row)] = delta.days + delta.seconds / 86400.0
+                    continue
+
+                if not is_formula:
+                    continue
+
+                formula = k_formula
+
+                # --- Pattern: ='Cover Page'!$B$6 ---
+                if "Cover Page" in formula and "B$6" in formula:
+                    if cover_date_raw is not None:
+                        if isinstance(cover_date_raw, (int, float)):
+                            k_values[str(row)] = float(cover_date_raw)
+                        elif isinstance(cover_date_raw, _dt):
+                            delta = cover_date_raw - _dt(1899, 12, 30)
+                            k_values[str(row)] = delta.days + delta.seconds / 86400.0
+                    continue
+
+                # --- Pattern: SUMIF-based (with or without IF wrapper) ---
+                if "SUMIF" in formula:
+                    ref = _to_float(b_val)
+                    if ref is not None:
+                        sumif_total = sumif_lookup.get(ref, 0.0)
+                        if "=IF(" in formula:
+                            if sumif_total == 0:
+                                if isinstance(j_cached, (int, float)):
+                                    k_values[str(row)] = float(j_cached)
+                            else:
+                                k_values[str(row)] = sumif_total
+                        else:
+                            k_values[str(row)] = sumif_total
+                        continue
+
+                # --- Pattern: =SUM(K...) → defer to second pass ---
+                if "SUM(" in formula and "K" in formula:
+                    continue
+
+                # --- Fallback: use cached value if numeric ---
+                if isinstance(k_cached, (int, float)):
+                    k_values[str(row)] = float(k_cached)
+                elif isinstance(k_cached, _dt):
+                    delta = k_cached - _dt(1899, 12, 30)
+                    k_values[str(row)] = delta.days + delta.seconds / 86400.0
+
+            # Second pass: SUM rows — process bottom-to-top so
+            # dependent totals (e.g. K8=SUM(K98,K136,K141)) resolve
+            sum_rows = []
+            for row in range(1, min(ws_d.max_row + 1, 2000)):
+                if str(row) in k_values:
+                    continue
+                kf = ws_f.cell(row, 11).value
+                if isinstance(kf, str) and "=SUM(" in kf:
+                    sum_rows.append(row)
+
+            for row in sorted(sum_rows, reverse=True):
+                formula = ws_f.cell(row, 11).value
+                # Extract inner part: =SUM(K15:K96) → K15:K96
+                m_sum = _re.search(r"SUM\(([^)]+)\)", formula)
+                if not m_sum:
+                    continue
+                inner = m_sum.group(1)
+                total = 0.0
+                for part in inner.split(","):
+                    part = part.strip()
+                    if ":" in part:
+                        m = _re.match(r"K(\d+):K(\d+)", part)
+                        if m:
+                            r1, r2 = int(m.group(1)), int(m.group(2))
+                            for rr in range(r1, r2 + 1):
+                                total += k_values.get(str(rr), 0.0)
+                    else:
+                        m = _re.match(r"K(\d+)", part)
+                        if m:
+                            total += k_values.get(str(m.group(1)), 0.0)
+                k_values[str(row)] = total
+
+            result[sheet_name] = k_values
+
+        wb_data.close()
+        wb_form.close()
+        return jsonify(result)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+
+# ---------------------------------------------------------------------------
 # Step 1: Bank of Canada FX rate proxy (replaces Vite dev proxy)
 # ---------------------------------------------------------------------------
 
