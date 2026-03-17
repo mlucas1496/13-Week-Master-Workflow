@@ -586,6 +586,23 @@ def run_mapping(agg_path, roll_path):
 
         job_state["progress"] = 94
 
+        # ---- Roll forward Actuals Week (column H = 8): non-zero/non-blank → +1 ----
+        add_log("Rolling forward Actuals Week (column H)...", "step")
+        COL_H = 8  # column H, 1-indexed (openpyxl)
+        aw_updated = 0
+        for row_idx in range(len(df_agg)):
+            val = df_agg.iloc[row_idx, 7]
+            if pd.isna(val) or val == '' or val == 0:
+                continue
+            try:
+                num = int(val)
+            except (ValueError, TypeError):
+                continue
+            excel_row = row_idx + 2  # +1 for header row, +1 for 1-indexed
+            ws.cell(row=excel_row, column=COL_H).value = num + 1
+            aw_updated += 1
+        add_log(f"  Rolled forward {aw_updated:,} Actuals Week values (+1 week)", "success")
+
         # ---- Save output ----
         out_name = "Activity Aggregator - MAPPED.xlsx"
         out_path = OUTPUT_DIR / out_name
